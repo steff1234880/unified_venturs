@@ -1,0 +1,18 @@
+{
+  "name": "intereor — Luxury Indian Interior Design",
+  "short_name": "intereor",
+  "description": "Award-winning luxury interior design atelier crafting bespoke Indian residences.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#FAF9F6",
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

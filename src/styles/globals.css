@@ -1,0 +1,317 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@import './typography.css';
+@import './animations.css';
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow-x: clip;
+  }
+
+  /* Keep scroll-behavior auto by default so native touch/momentum scrolling is instant and natural.
+     Smooth scrolling is handled specifically for anchor jumps via scrollToHash or programmatic scroll. */
+  html {
+    scroll-behavior: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    font-family: var(--font-body);
+    font-size: var(--text-body-md);
+    line-height: var(--text-body-md--line-height);
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    overflow-x: clip;
+    word-break: normal;
+    overflow-wrap: normal;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.cursor-none,
+  body.cursor-none a,
+  body.cursor-none button {
+    cursor: none;
+  }
+
+  #root {
+    isolation: isolate;
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    color: var(--color-charcoal-900);
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: var(--text-display-lg);
+    line-height: var(--text-display-lg--line-height);
+    letter-spacing: var(--text-display-lg--letter-spacing);
+  }
+
+  h2 {
+    font-size: var(--text-display-md);
+    line-height: var(--text-display-md--line-height);
+    letter-spacing: var(--text-display-md--letter-spacing);
+  }
+
+  h3 {
+    font-size: var(--text-display-sm);
+    line-height: var(--text-display-sm--line-height);
+  }
+
+  h4 {
+    font-size: var(--text-heading-lg);
+    line-height: var(--text-heading-lg--line-height);
+    font-weight: 500;
+  }
+
+  h5 {
+    font-size: var(--text-heading-md);
+    line-height: var(--text-heading-md--line-height);
+    font-weight: 500;
+  }
+
+  h6 {
+    font-size: var(--text-heading-sm);
+    line-height: var(--text-heading-sm--line-height);
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-luxury);
+  }
+
+  a:hover {
+    color: var(--color-gold-500);
+  }
+
+  a:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    touch-action: manipulation;
+  }
+
+  /* 16px minimum prevents iOS Safari zooming on focus */
+  @media (max-width: 767px) {
+    input,
+    textarea,
+    select {
+      font-size: max(16px, 1em);
+    }
+  }
+
+  input,
+  textarea,
+  select {
+    color: var(--color-charcoal-900);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-stone-400);
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-charcoal-900);
+    box-shadow: 0 0 0 1000px #ffffff inset;
+    transition: background-color 99999s ease-in-out 0s;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-200);
+    color: var(--color-charcoal-900);
+  }
+}
+
+@layer components {
+  .ds-container {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 1.5rem);
+  }
+
+  @media (min-width: 768px) {
+    .ds-container {
+      padding-inline: var(--spacing-8);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .ds-container {
+      padding-inline: var(--spacing-10);
+    }
+  }
+
+  .ds-section {
+    padding-block: var(--spacing-section-md);
+  }
+
+  .ds-section-sm {
+    padding-block: var(--spacing-section-sm);
+  }
+
+  .ds-section-lg {
+    padding-block: var(--spacing-section-lg);
+  }
+
+  .ds-gold-divider {
+    height: 1px;
+    border: none;
+    background-color: var(--color-border);
+  }
+
+  .ds-focus-ring {
+    outline: none;
+  }
+
+  .ds-focus-ring:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ─── Architectural Luxury Card Utilities ─── */
+  .card-architectural {
+    background-color: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-xs);
+    transition: all var(--duration-normal) var(--ease-luxury);
+  }
+
+  @media (hover: hover) {
+    .card-architectural:hover {
+      border-color: var(--color-gold-400);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  .card-architectural:active {
+    transform: scale(0.99);
+  }
+
+  /* Swiper Luxury Theming Overrides */
+  .featured-projects-swiper {
+    --swiper-theme-color: var(--color-charcoal-900);
+    --swiper-navigation-size: 18px;
+  }
+
+  .featured-projects-swiper .swiper-button-prev,
+  .featured-projects-swiper .swiper-button-next {
+    display: none !important;
+  }
+
+  @media (min-width: 1024px) {
+    .featured-projects-swiper .swiper-button-prev,
+    .featured-projects-swiper .swiper-button-next {
+      display: flex !important;
+      color: var(--color-charcoal-800) !important;
+      background: var(--color-surface-elevated);
+      border: 1px solid var(--color-border);
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-xs);
+      transition: all var(--duration-fast) var(--ease-luxury);
+    }
+
+    .featured-projects-swiper .swiper-button-prev:hover,
+    .featured-projects-swiper .swiper-button-next:hover {
+      background: var(--color-teak-600);
+      color: #FFFFFF !important;
+      border-color: var(--color-teak-600);
+    }
+
+    .featured-projects-swiper .swiper-button-prev::after,
+    .featured-projects-swiper .swiper-button-next::after {
+      font-size: 13px;
+      font-weight: 600;
+    }
+  }
+
+  .featured-projects-swiper .swiper-pagination-bullet {
+    background: var(--color-charcoal-500) !important;
+    opacity: 0.3 !important;
+    transition: all var(--duration-normal) var(--ease-luxury) !important;
+  }
+
+  .featured-projects-swiper .swiper-pagination-bullet-active {
+    background: var(--color-charcoal-900) !important;
+    opacity: 1 !important;
+    width: 1.25rem !important;
+    border-radius: var(--radius-xs) !important;
+  }
+}
+
+

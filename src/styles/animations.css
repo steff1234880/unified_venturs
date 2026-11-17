@@ -1,0 +1,187 @@
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes whatsapp-pulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 28px rgba(37, 211, 102, 0.35);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 8px 36px rgba(37, 211, 102, 0.55);
+    transform: scale(1.04);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes reveal-line {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@utility animate-delay-100 {
+  animation-delay: 100ms;
+}
+
+@utility animate-delay-200 {
+  animation-delay: 200ms;
+}
+
+@utility animate-delay-300 {
+  animation-delay: 300ms;
+}
+
+@utility animate-delay-400 {
+  animation-delay: 400ms;
+}
+
+@utility animate-delay-500 {
+  animation-delay: 500ms;
+}
+
+@utility animate-delay-700 {
+  animation-delay: 700ms;
+}
+
+@utility animate-whatsapp-pulse {
+  animation: whatsapp-pulse 2.4s ease-in-out infinite;
+}
+
+@utility transition-luxury {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-luxury);
+}
+
+@keyframes float-gentle-1 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(var(--frame-rot, 0deg));
+  }
+  50% {
+    transform: translate3d(4px, -12px, 0) rotate(calc(var(--frame-rot, 0deg) + 0.5deg));
+  }
+}
+
+@keyframes float-gentle-2 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(var(--frame-rot, 0deg));
+  }
+  50% {
+    transform: translate3d(-6px, -10px, 0) rotate(calc(var(--frame-rot, 0deg) - 0.4deg));
+  }
+}
+
+@keyframes float-gentle-3 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(var(--frame-rot, 0deg));
+  }
+  50% {
+    transform: translate3d(5px, -8px, 0) rotate(calc(var(--frame-rot, 0deg) + 0.3deg));
+  }
+}
+
+@keyframes float-gentle-4 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(var(--frame-rot, 0deg));
+  }
+  50% {
+    transform: translate3d(-3px, -14px, 0) rotate(calc(var(--frame-rot, 0deg) - 0.5deg));
+  }
+}
+
+@utility animate-float-1 {
+  animation: float-gentle-1 8s ease-in-out infinite;
+}
+
+@utility animate-float-2 {
+  animation: float-gentle-2 9.5s ease-in-out infinite;
+}
+
+@utility animate-float-3 {
+  animation: float-gentle-3 11s ease-in-out infinite;
+}
+
+@utility animate-float-4 {
+  animation: float-gentle-4 10s ease-in-out infinite;
+}
