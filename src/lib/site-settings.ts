@@ -147,7 +147,8 @@ function parseSiteSettings(raw: string | null): SiteSettings {
       !parsed.location.includes('Mumbai') &&
       parsed.location.includes('562125') &&
       parsed.location.includes('Bengaluru Urban') &&
-      parsed.location.includes('India')
+      parsed.location.includes('India') &&
+      parsed.location.includes('Building No./Flat No.')
         ? parsed.location.trim()
         : defaults.location
 

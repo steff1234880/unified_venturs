@@ -3,24 +3,26 @@ import {
   HiOutlineBookOpen,
   HiOutlinePlus,
   HiOutlineSearch,
-  HiOutlinePrinter,
   HiOutlinePencilAlt,
   HiOutlineTrash,
   HiOutlineStar,
-  HiOutlineMail,
   HiOutlineCheck,
   HiOutlineClock,
   HiOutlineUser,
   HiOutlineFolder,
   HiOutlineClipboardCopy,
+  HiOutlineDownload,
 } from 'react-icons/hi'
-import { FaWhatsapp } from 'react-icons/fa'
 
 import { useAdminCollection } from '@/admin/hooks/useAdminData'
 import { createItem, updateItem, deleteItem } from '@/admin/storage'
 import { ConfirmDialog } from '@/admin/components/PageHeader'
 import type { AdminNote, NoteCategory } from '@/admin/types'
+import { UNIFIED_VENTURES_GST } from '@/config/gst'
 import { cn } from '@/utils'
+import { generateNotepadExcel } from '@/admin/utils/exportNotepadExcel'
+import { generateNotepadWord } from '@/admin/utils/exportNotepadWord'
+import { downloadBlob } from '@/admin/utils/shareDocument'
 
 type FilterTab = 'all' | 'work' | 'personal' | 'pinned'
 
@@ -34,6 +36,7 @@ export function AdminNotepadPage() {
   const [previewMode, setPreviewMode] = useState<'split' | 'preview-only' | 'edit-only'>('split')
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [copyFeedback, setCopyFeedback] = useState(false)
+  const [downloadingFormat, setDownloadingFormat] = useState<'docx' | 'xlsx' | null>(null)
 
   // Editor form state
   const [formData, setFormData] = useState({
@@ -187,65 +190,34 @@ export function AdminNotepadPage() {
     }
   }
 
-  // Print A4 Document
-  const handlePrint = () => {
-    window.print()
+  // Download Word (.docx) directly
+  const handleDownloadWord = async (note: AdminNote) => {
+    try {
+      setDownloadingFormat('docx')
+      const cleanTitle = (note.title || 'NOTEPAD').replace(/[^a-zA-Z0-9_-]/g, '_')
+      const filename = `UNIFIED_VENTURES_INTERIOR_NOTEPAD_${cleanTitle}.docx`
+      const blob = await generateNotepadWord(note)
+      downloadBlob(blob, filename)
+    } catch (err) {
+      console.error('Failed to download notepad Word:', err)
+    } finally {
+      setDownloadingFormat(null)
+    }
   }
 
-  // WhatsApp share
-  const handleWhatsAppShare = (note: AdminNote) => {
-    const text = [
-      `*UNIFIED VENTURES — BRANDED ARCHITECTURAL NOTE*`,
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `*Document:* ${note.title}`,
-      note.subject ? `*Subject:* ${note.subject}` : '',
-      `*Client:* ${note.clientName || 'Valued Client'}`,
-      `*Project:* ${note.projectName || 'Bengaluru Project'}`,
-      `*Date:* ${note.date}`,
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      '',
-      note.content,
-      '',
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `*UNIFIED VENTURES ATELIER*`,
-      `📍 1&2, Site 1, Khata 164P, Kommasandra, Sarjapura, Bengaluru, Bengaluru Urban, Karnataka - 562125, India`,
-      `📞 +91 88 6772 5353 | support.unifiedventures@gmail.com`,
-    ]
-      .filter(Boolean)
-      .join('\n')
-
-    const url = `https://wa.me/?text=${encodeURIComponent(text)}`
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
-  // Email share
-  const handleEmailShare = (note: AdminNote) => {
-    const subject = encodeURIComponent(`Unified Ventures Note: ${note.title} [${note.projectName || 'Interior Design'}]`)
-    const body = encodeURIComponent(
-      [
-        `UNIFIED VENTURES`,
-        `Bespoke Interior Architecture & Living Spaces`,
-        `Bengaluru, Karnataka, India`,
-        `==================================================`,
-        `DOCUMENT: ${note.title.toUpperCase()}`,
-        note.subject ? `SUBJECT: ${note.subject}` : null,
-        `CLIENT: ${note.clientName || 'Private Residence'}`,
-        `PROJECT: ${note.projectName || 'Bengaluru Project'}`,
-        `DATE: ${note.date}`,
-        `==================================================`,
-        '',
-        note.content,
-        '',
-        `==================================================`,
-        `Atelier Office: 1&2, Site 1, Khata 164P, Kommasandra, Sarjapura, Bengaluru, Bengaluru Urban, Karnataka - 562125, India`,
-        `Phone: +91 88 6772 5353`,
-        `Website: https://unifiedventures.in`,
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    )
-
-    window.location.href = `mailto:?subject=${subject}&body=${body}`
+  // Download Excel (.xlsx) directly
+  const handleDownloadExcel = async (note: AdminNote) => {
+    try {
+      setDownloadingFormat('xlsx')
+      const cleanTitle = (note.title || 'NOTEPAD').replace(/[^a-zA-Z0-9_-]/g, '_')
+      const filename = `UNIFIED_VENTURES_INTERIOR_NOTEPAD_${cleanTitle}.xlsx`
+      const blob = await generateNotepadExcel(note)
+      downloadBlob(blob, filename)
+    } catch (err) {
+      console.error('Failed to download notepad Excel:', err)
+    } finally {
+      setDownloadingFormat(null)
+    }
   }
 
   // Web Share API with Clipboard Fallback
@@ -502,30 +474,27 @@ export function AdminNotepadPage() {
                       </button>
 
                       <button
-                        onClick={handlePrint}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition"
-                        title="Print / Save PDF"
+                        onClick={() => handleDownloadWord(selectedNote)}
+                        disabled={downloadingFormat !== null}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition cursor-pointer disabled:opacity-60"
+                        title="Download Word (.docx)"
                       >
-                        <HiOutlinePrinter className="h-4 w-4 text-charcoal-600" />
-                        <span className="hidden sm:inline">Print / PDF</span>
+                        <HiOutlineDownload className="h-4 w-4 text-blue-600" />
+                        <span className="hidden sm:inline">
+                          {downloadingFormat === 'docx' ? 'Downloading...' : 'Download Word (.docx)'}
+                        </span>
                       </button>
 
                       <button
-                        onClick={() => handleWhatsAppShare(selectedNote)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-caption font-medium text-emerald-800 hover:bg-emerald-100 transition"
-                        title="Share on WhatsApp"
+                        onClick={() => handleDownloadExcel(selectedNote)}
+                        disabled={downloadingFormat !== null}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition cursor-pointer disabled:opacity-60"
+                        title="Download Excel (.xlsx)"
                       >
-                        <FaWhatsapp className="h-4 w-4 text-emerald-600" />
-                        <span className="hidden sm:inline">WhatsApp</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleEmailShare(selectedNote)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition"
-                        title="Share via Email"
-                      >
-                        <HiOutlineMail className="h-4 w-4" />
-                        <span className="hidden sm:inline">Email</span>
+                        <HiOutlineDownload className="h-4 w-4 text-emerald-600" />
+                        <span className="hidden sm:inline">
+                          {downloadingFormat === 'xlsx' ? 'Downloading...' : 'Download Excel (.xlsx)'}
+                        </span>
                       </button>
 
                       <button
@@ -873,32 +842,20 @@ function LetterheadDocument({ note }: { note: Partial<AdminNote> }) {
       {/* Letterhead Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 pb-6 border-b-2 border-gold-400">
         <div>
-          <div className="flex items-center gap-3">
+          <div>
             <img
               src="/logo.png"
               alt="Unified Ventures Logo"
-              className="h-10 w-auto object-contain"
-              onError={(e) => {
-                // Graceful fallback if image path isn't loaded
-                ;(e.currentTarget as HTMLElement).style.display = 'none'
-              }}
+              className="h-10 sm:h-12 w-auto object-contain shrink-0 mb-2"
             />
-            <div>
-              <h2 className="text-xl sm:text-2xl font-serif font-bold tracking-wider text-charcoal-900 uppercase">
-                Unified Ventures
-              </h2>
-              <p className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.2em] text-gold-600">
-                Atelier of Interior Architecture & Bespoke Living
-              </p>
-            </div>
           </div>
         </div>
 
         {/* Company Contact Details (Verified Bengaluru Location) */}
         <div className="text-left sm:text-right text-[11px] leading-relaxed text-charcoal-600 font-sans">
           <p className="font-semibold text-charcoal-900">Unified Ventures</p>
-          <p>1&2, Site 1, Khata 164P, Kommasandra, Sarjapura</p>
-          <p>Bengaluru, Bengaluru Urban, Karnataka - 562125, India</p>
+          <p>{UNIFIED_VENTURES_GST.address.building}</p>
+          <p>{UNIFIED_VENTURES_GST.address.street}, {UNIFIED_VENTURES_GST.address.city}, {UNIFIED_VENTURES_GST.address.state} {UNIFIED_VENTURES_GST.address.pincode}, {UNIFIED_VENTURES_GST.address.country}.</p>
           <p className="mt-1 font-mono text-[10px] text-charcoal-700">
             Tel: +91 88 6772 5353
           </p>

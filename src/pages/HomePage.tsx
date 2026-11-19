@@ -24,8 +24,8 @@ const organizationSchema = {
   areaServed: 'IN',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: '1&2, Site 1, Khata 164P, Kommasandra, Sarjapura',
-    addressLocality: 'Bengaluru',
+    streetAddress: 'Building No./Flat No. 1&2, Site 1, Khata 164P, Kommasandra Road, Sarjapura',
+    addressLocality: 'Bengaluru Urban',
     addressRegion: 'Karnataka',
     postalCode: '562125',
     addressCountry: 'India',

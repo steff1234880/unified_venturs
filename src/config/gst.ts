@@ -8,14 +8,14 @@ export const UNIFIED_VENTURES_GST = {
   state: 'Karnataka',
   stateCode: '29',
   address: {
-    building: '1&2, Site 1, Khata 164P',
-    street: 'Kommasandra, Sarjapura',
-    city: 'Bengaluru',
+    building: 'Building No./Flat No. 1&2, Site 1, Khata 164P',
+    street: 'Kommasandra Road, Sarjapura',
+    city: 'Bengaluru Urban',
     district: 'Bengaluru Urban',
     state: 'Karnataka',
     pincode: '562125',
     country: 'India',
-    full: '1&2, Site 1, Khata 164P, Kommasandra, Sarjapura, Bengaluru, Bengaluru Urban, Karnataka - 562125, India',
+    full: 'Building No./Flat No. 1&2, Site 1, Khata 164P, Kommasandra Road, Sarjapura, Bengaluru Urban, Karnataka 562125, India.',
   },
   contact: {
     phone: '+91 88 6772 5353',

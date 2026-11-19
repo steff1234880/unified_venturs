@@ -3,17 +3,15 @@ import {
   HiOutlineDocumentReport,
   HiOutlinePlus,
   HiOutlineSearch,
-  HiOutlinePrinter,
   HiOutlinePencilAlt,
   HiOutlineTrash,
-  HiOutlineMail,
   HiOutlineCheck,
   HiOutlineClock,
   HiOutlineUser,
   HiOutlineFolder,
   HiOutlineClipboardCopy,
+  HiOutlineDownload,
 } from 'react-icons/hi'
-import { FaWhatsapp } from 'react-icons/fa'
 
 import { useAdminCollection } from '@/admin/hooks/useAdminData'
 import { createItem, updateItem, deleteItem } from '@/admin/storage'
@@ -22,6 +20,9 @@ import type { AdminInvoice, InvoiceItem, InvoiceStatus } from '@/admin/types'
 import { UNIFIED_VENTURES_GST } from '@/config/gst'
 import { numberToIndianWords, formatINR } from '@/admin/utils/invoice'
 import { cn } from '@/utils'
+import { generateInvoiceExcel } from '@/admin/utils/exportInvoiceExcel'
+import { generateInvoiceWord } from '@/admin/utils/exportInvoiceWord'
+import { downloadBlob } from '@/admin/utils/shareDocument'
 
 type FilterStatus = 'all' | 'issued' | 'paid' | 'draft' | 'cancelled'
 
@@ -55,6 +56,7 @@ export function AdminInvoicesPage() {
   const [editTab, setEditTab] = useState<'form' | 'preview'>('form')
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [copyFeedback, setCopyFeedback] = useState(false)
+  const [downloadingFormat, setDownloadingFormat] = useState<'xlsx' | 'docx' | null>(null)
 
   // Editor Form state
   const [formData, setFormData] = useState<Omit<AdminInvoice, 'id' | 'createdAt' | 'updatedAt'>>({
@@ -400,88 +402,34 @@ export function AdminInvoicesPage() {
     }))
   }
 
-  // Print A4 Invoice
-  const handlePrint = () => {
-    window.print()
+  // Direct Download Excel (.xlsx)
+  const handleDownloadExcel = async (inv: AdminInvoice) => {
+    try {
+      setDownloadingFormat('xlsx')
+      const cleanInvNumber = (inv.invoiceNumber || 'INVOICE').replace(/[^a-zA-Z0-9_-]/g, '_')
+      const filename = `UNIFIED_VENTURES_GST_INVOICE_${cleanInvNumber}.xlsx`
+      const blob = await generateInvoiceExcel(inv)
+      downloadBlob(blob, filename)
+    } catch (err) {
+      console.error('Failed to download invoice Excel:', err)
+    } finally {
+      setDownloadingFormat(null)
+    }
   }
 
-  // Share via WhatsApp
-  const handleWhatsAppShare = (inv: AdminInvoice) => {
-    const text = [
-      `*UNIFIED VENTURES — OFFICIAL GST TAX INVOICE*`,
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `*Invoice No:* ${inv.invoiceNumber}`,
-      `*Date:* ${inv.invoiceDate}`,
-      `*Client:* ${inv.clientName} ${inv.clientCompany ? `(${inv.clientCompany})` : ''}`,
-      inv.projectName ? `*Project:* ${inv.projectName}` : '',
-      `*Place of Supply:* ${inv.placeOfSupply}`,
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `*Taxable Value:* ${formatINR(inv.taxableSubtotal)}`,
-      inv.isInterState
-        ? `*IGST (18%):* ${formatINR(inv.totalIgst)}`
-        : `*CGST + SGST (9%+9%):* ${formatINR(inv.totalCgst + inv.totalSgst)}`,
-      `*Grand Total:* ${formatINR(inv.grandTotal)}`,
-      `*Amount in Words:* ${inv.amountInWords}`,
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `*Payment Details:*`,
-      `Bank: ${inv.bankDetails?.bankName || UNIFIED_VENTURES_GST.bank.bankName}`,
-      `A/C No: ${inv.bankDetails?.accountNumber || UNIFIED_VENTURES_GST.bank.accountNumber}`,
-      `IFSC: ${inv.bankDetails?.ifscCode || UNIFIED_VENTURES_GST.bank.ifscCode}`,
-      `UPI: ${inv.bankDetails?.upiId || UNIFIED_VENTURES_GST.bank.upiId}`,
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `*UNIFIED VENTURES ATELIER*`,
-      `GSTIN: ${UNIFIED_VENTURES_GST.gstin}`,
-      `Address: ${UNIFIED_VENTURES_GST.address.full}`,
-      `Phone: +91 88 6772 5353`,
-    ]
-      .filter(Boolean)
-      .join('\n')
-
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
-  }
-
-  // Share via Email
-  const handleEmailShare = (inv: AdminInvoice) => {
-    const subject = encodeURIComponent(
-      `Tax Invoice ${inv.invoiceNumber} — Unified Ventures Interior Architecture`,
-    )
-    const body = encodeURIComponent(
-      [
-        `Dear ${inv.clientName},`,
-        '',
-        `Please find attached our official GST Tax Invoice regarding your interior architecture project:`,
-        '',
-        `==================================================`,
-        `TAX INVOICE DETAILS`,
-        `Invoice Number: ${inv.invoiceNumber}`,
-        `Invoice Date: ${inv.invoiceDate}`,
-        `Project: ${inv.projectName || 'Interior Living Space'}`,
-        `Taxable Amount: ${formatINR(inv.taxableSubtotal)}`,
-        inv.isInterState
-          ? `IGST: ${formatINR(inv.totalIgst)}`
-          : `CGST & SGST: ${formatINR(inv.totalCgst + inv.totalSgst)}`,
-        `Total Invoice Value: ${formatINR(inv.grandTotal)}`,
-        `Amount in Words: ${inv.amountInWords}`,
-        `==================================================`,
-        '',
-        `Bank Transfer Details:`,
-        `Account Name: ${inv.bankDetails?.accountName || UNIFIED_VENTURES_GST.bank.accountName}`,
-        `Bank: ${inv.bankDetails?.bankName || UNIFIED_VENTURES_GST.bank.bankName}`,
-        `Account Number: ${inv.bankDetails?.accountNumber || UNIFIED_VENTURES_GST.bank.accountNumber}`,
-        `IFSC Code: ${inv.bankDetails?.ifscCode || UNIFIED_VENTURES_GST.bank.ifscCode}`,
-        `UPI ID: ${inv.bankDetails?.upiId || UNIFIED_VENTURES_GST.bank.upiId}`,
-        '',
-        `Kindly acknowledge receipt and process payment before the due date (${inv.dueDate || '15 days'}).`,
-        '',
-        `Warm regards,`,
-        `Accounts Department`,
-        `Unified Ventures Atelier, Bengaluru`,
-        `GSTIN: ${UNIFIED_VENTURES_GST.gstin}`,
-        `Tel: +91 88 6772 5353`,
-      ].join('\n'),
-    )
-
-    window.location.href = `mailto:${inv.clientEmail || ''}?subject=${subject}&body=${body}`
+  // Direct Download Word (.docx)
+  const handleDownloadWord = async (inv: AdminInvoice) => {
+    try {
+      setDownloadingFormat('docx')
+      const cleanInvNumber = (inv.invoiceNumber || 'INVOICE').replace(/[^a-zA-Z0-9_-]/g, '_')
+      const filename = `UNIFIED_VENTURES_GST_INVOICE_${cleanInvNumber}.docx`
+      const blob = await generateInvoiceWord(inv)
+      downloadBlob(blob, filename)
+    } catch (err) {
+      console.error('Failed to download invoice Word:', err)
+    } finally {
+      setDownloadingFormat(null)
+    }
   }
 
   // Copy Summary
@@ -743,30 +691,27 @@ export function AdminInvoicesPage() {
                       </button>
 
                       <button
-                        onClick={handlePrint}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition cursor-pointer"
-                        title="Print / Save PDF"
+                        onClick={() => handleDownloadExcel(selectedInvoice)}
+                        disabled={downloadingFormat !== null}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition cursor-pointer disabled:opacity-60"
+                        title="Download Excel (.xlsx)"
                       >
-                        <HiOutlinePrinter className="h-4 w-4 text-charcoal-600" />
-                        <span className="hidden sm:inline">Print / PDF</span>
+                        <HiOutlineDownload className="h-4 w-4 text-emerald-600" />
+                        <span className="hidden sm:inline">
+                          {downloadingFormat === 'xlsx' ? 'Downloading...' : 'Download Excel (.xlsx)'}
+                        </span>
                       </button>
 
                       <button
-                        onClick={() => handleWhatsAppShare(selectedInvoice)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-caption font-medium text-emerald-800 hover:bg-emerald-100 transition cursor-pointer"
-                        title="Share on WhatsApp"
+                        onClick={() => handleDownloadWord(selectedInvoice)}
+                        disabled={downloadingFormat !== null}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition cursor-pointer disabled:opacity-60"
+                        title="Download Word (.docx)"
                       >
-                        <FaWhatsapp className="h-4 w-4 text-emerald-600" />
-                        <span className="hidden sm:inline">WhatsApp</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleEmailShare(selectedInvoice)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition cursor-pointer"
-                        title="Send via Email"
-                      >
-                        <HiOutlineMail className="h-4 w-4" />
-                        <span className="hidden sm:inline">Email</span>
+                        <HiOutlineDownload className="h-4 w-4 text-blue-600" />
+                        <span className="hidden sm:inline">
+                          {downloadingFormat === 'docx' ? 'Downloading...' : 'Download Word (.docx)'}
+                        </span>
                       </button>
 
                       <button
@@ -1352,14 +1297,11 @@ function GstTaxInvoiceDocument({ invoice }: { invoice: Partial<AdminInvoice> }) 
             <img
               src="/logo.png"
               alt="Unified Ventures"
-              className="h-10 sm:h-12 w-auto object-contain shrink-0"
-              onError={(e) => {
-                ;(e.currentTarget as HTMLElement).style.display = 'none'
-              }}
+              className="h-10 sm:h-12 w-auto object-contain shrink-0 mb-2"
             />
           </div>
 
-          <div className="mt-3 text-xs text-charcoal-600 leading-relaxed font-sans space-y-0.5">
+          <div className="mt-2 text-xs text-charcoal-600 leading-relaxed font-sans space-y-0.5">
             <p className="font-semibold text-charcoal-900">{UNIFIED_VENTURES_GST.address.building}</p>
             <p>{UNIFIED_VENTURES_GST.address.street}</p>
             <p>
