@@ -23,11 +23,6 @@ export const pageSeo: Record<
     description:
       'Discover the story, artisans, and philosophy behind our award-winning luxury interior design practice.',
   },
-  '/services': {
-    title: 'Interior Design Services',
-    description:
-      'Bespoke interiors, heritage restoration, luxury furnishing, and turnkey execution for discerning homeowners.',
-  },
   '/projects': {
     title: 'Portfolio Projects',
     description:

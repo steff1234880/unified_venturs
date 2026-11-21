@@ -11,7 +11,7 @@ export const aboutStory = {
     'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=80',
   quote: {
     text: 'We design homes that honour the past while embracing how families live today.',
-    author: 'Aditya Verma, Founder',
+    author: 'Ajay, Founder',
   },
 } as const
 

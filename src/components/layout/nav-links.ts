@@ -5,7 +5,6 @@ export type NavLinkItem = {
 
 export const navLinks: NavLinkItem[] = [
   { label: 'About', href: '/about' },
-  { label: 'Services', href: '/services' },
   { label: 'Projects', href: '/projects' },
 ]
 

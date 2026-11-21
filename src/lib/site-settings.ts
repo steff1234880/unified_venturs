@@ -8,15 +8,11 @@ export const SITE_SETTINGS_UPDATED_EVENT = 'intereor-site-settings-updated'
 
 export const SOCIAL_PLATFORMS: SocialPlatform[] = [
   'instagram',
-  'pinterest',
-  'linkedin',
   'facebook',
 ]
 
 const SOCIAL_HOSTS: Record<SocialPlatform, string[]> = {
   instagram: ['instagram.com'],
-  pinterest: ['pinterest.com', 'pin.it'],
-  linkedin: ['linkedin.com', 'lnkd.in'],
   facebook: ['facebook.com', 'fb.com', 'fb.me'],
 }
 
@@ -93,6 +89,69 @@ export const DEFAULT_BEFORE_AFTER = {
   afterImage: '/images/after-living-room.jpg',
 }
 
+export const DEFAULT_CRAFTSMANSHIP = {
+  enabled: true,
+  overline: 'Material Integrity',
+  heading: 'The Art of Craftsmanship',
+  description:
+    'Our interiors are defined not merely by visual proportion, but by tactile authenticity — honed marbles, aged metals, hand-planed teak, and museum-grade handloom textiles sourced across the Indian subcontinent.',
+  quote: 'Luxury is the honest soul of authentic stone and hand-sculpted grain.',
+  pillars: [
+    {
+      id: 'stone-marble',
+      discipline: 'Monumental Masonry',
+      material: 'Veined Marble & Laterite',
+      title: 'Honed Stone & Monolithic Veining',
+      caption:
+        'Hand-selected Statuario and indigenous Makrana marbles, bookmatched with zero-tolerance micro-joints.',
+      provenance: 'Master Stone Guilds',
+      finish: 'Silk-Honed Matte & Fluted Relief',
+      image:
+        'https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=85',
+      aspectRatio: 'aspect-4/5',
+    },
+    {
+      id: 'timber-joinery',
+      discipline: 'Artisanal Joinery',
+      material: 'Burmese Teak & Dark Walnut',
+      title: 'Warm Grain & Architectural Millwork',
+      caption:
+        'Seasoned solid hardwoods turned into bespoke fluted wall panels, seamless concealed pivot doors, and heirloom credenzas.',
+      provenance: 'Dedicated Joinery Ateliers',
+      finish: 'Hand-Rubbed Organic Wax & Natural Oil',
+      image:
+        'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=85',
+      aspectRatio: 'aspect-16/10',
+    },
+    {
+      id: 'bespoke-brass',
+      discipline: 'Metalwork & Hardware',
+      material: 'Aged Brass & Bronze Castings',
+      title: 'Antiquated Patinas & Bespoke Accents',
+      caption:
+        'Custom unlacquered brass hardware, hand-beaten partition screens, and recessed profiles that age gracefully alongside the home.',
+      provenance: 'Artisanal Metal Guilds',
+      finish: 'Brushed Satin & Living Patina',
+      image:
+        'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=85',
+      aspectRatio: 'aspect-4/3',
+    },
+    {
+      id: 'tactile-textiles',
+      discipline: 'Textile Architecture',
+      material: 'Handloom Linen & Wild Silk',
+      title: 'Tactile Weaves & Acoustic Softness',
+      caption:
+        'Custom woven silks, bouclé wool drapery, and unbleached Belgian linens layered to soften geometric architecture and filter ambient light.',
+      provenance: 'Master Weaving Looms',
+      finish: 'Raw Organic Weave & Calendered Softness',
+      image:
+        'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85',
+      aspectRatio: 'aspect-3/4',
+    },
+  ],
+}
+
 function getDefaultSiteSettings(): SiteSettings {
   if (!defaultSettings) {
     defaultSettings = {
@@ -109,6 +168,7 @@ function getDefaultSiteSettings(): SiteSettings {
       beforeAfterDescription: DEFAULT_BEFORE_AFTER.description,
       beforeAfterBeforeImage: DEFAULT_BEFORE_AFTER.beforeImage,
       beforeAfterAfterImage: DEFAULT_BEFORE_AFTER.afterImage,
+      craftsmanship: DEFAULT_CRAFTSMANSHIP,
       updatedAt: 'default',
     }
   }
@@ -159,6 +219,14 @@ function parseSiteSettings(raw: string | null): SiteSettings {
       email: parsed.email?.trim() || defaults.email,
       contactPersons,
       social,
+      craftsmanship: {
+        ...defaults.craftsmanship!,
+        ...(parsed.craftsmanship || {}),
+        pillars:
+          Array.isArray(parsed.craftsmanship?.pillars) && parsed.craftsmanship.pillars.length > 0
+            ? parsed.craftsmanship.pillars
+            : defaults.craftsmanship!.pillars,
+      },
       instagramUrl: social.instagram.url,
       whatsappPhone: normalizeWhatsAppPhone(
         parsed.whatsappPhone ?? defaults.whatsappPhone,

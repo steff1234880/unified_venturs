@@ -47,3 +47,8 @@ desktop.ini
 desktop-*.png
 mobile-*.png
 dom-*.html
+
+# Local database file
+data/*.db
+data/*.db-*
+

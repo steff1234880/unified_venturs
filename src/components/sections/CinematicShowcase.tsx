@@ -16,6 +16,7 @@ import { Button } from '@/components/ui'
 import { usePrefersReducedMotion, useScrollLock, useSectionReveal } from '@/hooks'
 import { gsap } from '@/lib/gsap'
 import { cn } from '@/utils'
+import { getProjectImagePlaceholder } from '@/utils/project-placeholder'
 
 import { projects as fallbackProjects } from './data/home.data'
 import { SectionHeader, SectionShell } from './shared/SectionHeader'
@@ -84,8 +85,11 @@ export function CinematicShowcase() {
                 title: p.title,
                 location: p.location,
                 category: p.category,
-                image: p.image,
-                images: p.images && p.images.length > 0 ? p.images : [p.image],
+                image: p.image || getProjectImagePlaceholder(p.title),
+                images:
+                  p.images && p.images.length > 0
+                    ? p.images
+                    : [p.image || getProjectImagePlaceholder(p.title)],
                 description: p.description || '',
                 year: p.year,
                 area: p.area,
@@ -356,6 +360,12 @@ export function CinematicShowcase() {
                   height={750}
                   decoding="async"
                   loading="lazy"
+                  onError={(e) => {
+                    const fallback = getProjectImagePlaceholder(heroProject.title)
+                    if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                      ;(e.currentTarget as HTMLImageElement).src = fallback
+                    }
+                  }}
                   className="size-full object-cover transition-transform duration-700 ease-luxury group-hover:scale-105"
                 />
 
@@ -434,6 +444,12 @@ export function CinematicShowcase() {
                     height={600}
                     decoding="async"
                     loading="lazy"
+                    onError={(e) => {
+                      const fallback = getProjectImagePlaceholder(project.title)
+                      if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                        ;(e.currentTarget as HTMLImageElement).src = fallback
+                      }
+                    }}
                     className="size-full object-cover transition-transform duration-700 ease-luxury group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-linear-to-t from-charcoal-950/70 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
@@ -563,6 +579,12 @@ export function CinematicShowcase() {
                 key={currentDisplayImage}
                 src={currentDisplayImage}
                 alt={`${activeViewerProject.title} - Fullscreen View`}
+                onError={(e) => {
+                  const fallback = getProjectImagePlaceholder(activeViewerProject.title)
+                  if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                    ;(e.currentTarget as HTMLImageElement).src = fallback
+                  }
+                }}
                 className="max-h-[66vh] sm:max-h-[72vh] lg:max-h-[76vh] max-w-[92vw] sm:max-w-[85vw] lg:max-w-[80vw] object-contain rounded-lg border border-white/10 shadow-2xl transition-transform duration-300 select-none pointer-events-auto"
                 draggable={false}
               />
@@ -592,7 +614,17 @@ export function CinematicShowcase() {
                         )}
                         aria-label={`View photo ${idx + 1}`}
                       >
-                        <img src={img} alt="" className="size-full object-cover" />
+                        <img
+                          src={img}
+                          alt=""
+                          onError={(e) => {
+                            const fallback = getProjectImagePlaceholder(activeViewerProject.title)
+                            if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                              ;(e.currentTarget as HTMLImageElement).src = fallback
+                            }
+                          }}
+                          className="size-full object-cover"
+                        />
                       </button>
                     ))}
                   </>

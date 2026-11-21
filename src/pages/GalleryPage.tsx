@@ -1,15 +1,56 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
+import { fetchCollection } from '@/admin/storage'
+import type { AdminGalleryItem } from '@/admin/types'
 import { useSectionReveal } from '@/hooks'
 import { gsap } from '@/lib/gsap'
 import { cn } from '@/utils'
 
-import { galleryCollections } from './data/gallery.data'
+import { galleryCollections as defaultCollections } from './data/gallery.data'
 
 export function GalleryPage() {
   const pageRef = useSectionReveal<HTMLElement>({ stagger: 0.06 })
   const scrollTrackRef = useRef<HTMLDivElement>(null)
   const pinSectionRef = useRef<HTMLElement>(null)
+  const [adminItems, setAdminItems] = useState<AdminGalleryItem[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadAdminGallery() {
+      try {
+        const stored = (await fetchCollection('gallery')) as AdminGalleryItem[]
+        if (cancelled || !Array.isArray(stored) || stored.length === 0) return
+        setAdminItems(stored)
+      } catch {
+        // Fallback to default collections
+      }
+    }
+    void loadAdminGallery()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const collections = useMemo(() => {
+    if (adminItems.length === 0) return defaultCollections
+
+    // Group admin gallery items by collection name
+    const grouped = new Map<string, Array<{ src: string; alt: string }>>()
+    for (const item of adminItems) {
+      const colName = item.collection || 'Living Spaces'
+      if (!grouped.has(colName)) {
+        grouped.set(colName, [])
+      }
+      grouped.get(colName)!.push({ src: item.src, alt: item.alt })
+    }
+
+    const result = Array.from(grouped.entries()).map(([name, images]) => ({
+      name,
+      images,
+    }))
+
+    return result.length > 0 ? result : defaultCollections
+  }, [adminItems])
 
   useLayoutEffect(() => {
     const section = pinSectionRef.current
@@ -70,10 +111,10 @@ export function GalleryPage() {
           ref={scrollTrackRef}
           className="flex h-full items-center gap-4 px-4 sm:gap-6 sm:px-6 md:gap-8 md:px-12"
         >
-          {galleryCollections.flatMap((collection) =>
-            collection.images.map((image) => (
+          {collections.flatMap((collection) =>
+            collection.images.map((image, idx) => (
               <figure
-                key={image.src}
+                key={`${image.src}-${idx}`}
                 data-reveal
                 className="group relative h-[56vh] max-h-[500px] w-[85vw] sm:w-[70vw] md:w-[55vw] lg:h-[70vh] lg:w-[45vw] shrink-0 overflow-hidden rounded-md sm:rounded-lg border border-white/15 bg-charcoal-950 shadow-sm active:scale-[0.99] transition-all"
               >
@@ -99,7 +140,7 @@ export function GalleryPage() {
       </section>
 
       {/* Collection grids — stacked full-bleed rows */}
-      {galleryCollections.map((collection, collectionIndex) => (
+      {collections.map((collection, collectionIndex) => (
         <section
           key={collection.name}
           className={cn(

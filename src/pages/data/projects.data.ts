@@ -22,7 +22,8 @@ export const portfolioProjects = [
     category: 'Completed Residences' as const,
     year: '2024',
     area: 'Bengaluru',
-    image: '/placeholders/kolte-patil-i-towers.svg',
+    image:
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80',
     featured: false,
   },
   {
@@ -31,7 +32,8 @@ export const portfolioProjects = [
     category: 'Completed Residences' as const,
     year: '2024',
     area: 'Bengaluru',
-    image: '/placeholders/brigade-cornerstone-utopia.svg',
+    image:
+      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80',
     featured: false,
   },
   {
@@ -40,7 +42,8 @@ export const portfolioProjects = [
     category: 'Completed Residences' as const,
     year: '2024',
     area: 'Bengaluru',
-    image: '/placeholders/bren-zahara.svg',
+    image:
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
     featured: false,
   },
   {
@@ -49,7 +52,8 @@ export const portfolioProjects = [
     category: 'Completed Residences' as const,
     year: '2024',
     area: 'Bengaluru',
-    image: '/placeholders/alpine-viva.svg',
+    image:
+      'https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80',
     featured: false,
   },
 ] as const

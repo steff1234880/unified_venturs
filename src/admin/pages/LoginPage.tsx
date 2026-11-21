@@ -3,16 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import { Button, FormField, Input } from '@/components/ui'
 import { Logo } from '@/components/common'
-import { env } from '@/config/env'
-import { isLocalAdminMode } from '@/admin/auth/mode'
 import { useAuth } from '@/admin/auth/AuthProvider'
 
 export function AdminLoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState(() => (isLocalAdminMode() ? env.adminEmail : ''))
-  const [password, setPassword] = useState(() => (isLocalAdminMode() ? env.adminPassword : ''))
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -54,21 +52,6 @@ export function AdminLoginPage() {
             Enter your credentials to access the dashboard.
           </p>
 
-          {isLocalAdminMode() && (
-            <p
-              onClick={() => {
-                setEmail(env.adminEmail)
-                setPassword(env.adminPassword)
-              }}
-              className="mt-4 rounded-md border border-gold-400/30 bg-gold-50/70 px-3.5 py-2.5 sm:px-4 sm:py-3 text-body-sm text-charcoal-800 break-words cursor-pointer hover:bg-gold-100/60 transition-colors"
-              title="Click to auto-fill dev credentials"
-            >
-              Local dev mode — use{' '}
-              <strong className="break-all">{env.adminEmail}</strong> / <strong>{env.adminPassword}</strong>{' '}
-              <span className="text-xs text-gold-700 block mt-0.5">(Click to auto-fill)</span>
-            </p>
-          )}
-
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <FormField id="admin-email" label="Email" required>
               <Input
@@ -76,6 +59,7 @@ export function AdminLoginPage() {
                 autoComplete="username"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                placeholder="admin@example.com"
                 required
               />
             </FormField>
@@ -86,6 +70,7 @@ export function AdminLoginPage() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                placeholder="••••••••"
                 required
               />
             </FormField>

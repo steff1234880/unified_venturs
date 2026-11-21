@@ -34,6 +34,7 @@ export function Contact() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (loading) return
     const form = event.currentTarget
     const data = new FormData(form)
 

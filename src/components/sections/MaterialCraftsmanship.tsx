@@ -13,6 +13,7 @@ import { fetchCollection } from '@/admin/storage'
 import type { AdminGalleryItem } from '@/admin/types'
 import { Button } from '@/components/ui'
 import { useMediaQuery, usePrefersReducedMotion, useScrollLock, useSectionReveal } from '@/hooks'
+import { useSiteSettings } from '@/hooks/useSiteSettings'
 import { gsap } from '@/lib/gsap'
 
 import { SectionHeader, SectionShell } from './shared/SectionHeader'
@@ -101,6 +102,7 @@ export function MaterialCraftsmanship() {
   const navigate = useNavigate()
   const prefersReducedMotion = usePrefersReducedMotion()
   const isMobile = useMediaQuery('(max-width: 639px)')
+  const siteSettings = useSiteSettings()
 
   const [pillars, setPillars] = useState<CraftsmanshipPillar[]>(defaultCraftsmanshipPillars)
   const [activeItem, setActiveItem] = useState<CraftsmanshipPillar | null>(null)
@@ -109,6 +111,68 @@ export function MaterialCraftsmanship() {
 
   const imageCardRefs = useRef<(HTMLDivElement | null)[]>([])
   const featureCardRef = useRef<HTMLDivElement | null>(null)
+
+  const craftSettings = siteSettings?.craftsmanship
+
+  // Sync with Admin craftsmanship collection, falling back to siteSettings or defaultCraftsmanshipPillars
+  useEffect(() => {
+    let cancelled = false
+
+    const loadCraftsmanship = async () => {
+      try {
+        const items = await fetchCollection('craftsmanship')
+        if (cancelled) return
+
+        if (Array.isArray(items) && items.length > 0) {
+          // Filter to published only and sort by order
+          const published = items
+            .filter((item: any) => item.published !== false)
+            .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+
+          if (published.length > 0) {
+            setPillars(
+              published.map((p: any) => ({
+                id: p.id || `pillar_${Math.random().toString(36).slice(2, 7)}`,
+                discipline: p.discipline || 'Artisanal Craft',
+                material: p.material || 'Material Specimen',
+                title: p.title || 'Architectural Detail',
+                caption: p.caption || '',
+                provenance: p.provenance || 'Master Artisans',
+                finish: p.finish || 'Hand-Crafted',
+                image: p.image || '/images/after-living-room.jpg',
+                aspectRatio: p.aspectRatio || 'aspect-4/3',
+              })),
+            )
+            return
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch craftsmanship collection, checking fallback:', err)
+      }
+
+      if (craftSettings?.pillars && Array.isArray(craftSettings.pillars) && craftSettings.pillars.length > 0) {
+        setPillars(
+          craftSettings.pillars.map((p: any) => ({
+            id: p.id || `pillar_${Math.random().toString(36).slice(2, 7)}`,
+            discipline: p.discipline || 'Artisanal Craft',
+            material: p.material || 'Material Specimen',
+            title: p.title || 'Architectural Detail',
+            caption: p.caption || '',
+            provenance: p.provenance || 'Master Artisans',
+            finish: p.finish || 'Hand-Crafted',
+            image: p.image || '/images/after-living-room.jpg',
+            aspectRatio: p.aspectRatio || 'aspect-4/3',
+          })),
+        )
+      }
+    }
+
+    loadCraftsmanship()
+
+    return () => {
+      cancelled = true
+    }
+  }, [craftSettings])
 
   // Prevent background scrolling while inspecting material detail
   useScrollLock(activeItem !== null)
@@ -311,6 +375,19 @@ export function MaterialCraftsmanship() {
   }
   const activeIndex = activeItem ? pillars.findIndex((p) => p.id === activeItem.id) : -1
 
+  if (craftSettings?.enabled === false) {
+    return null
+  }
+
+  const overline = craftSettings?.overline || 'Material Integrity'
+  const heading = craftSettings?.heading || 'The Art of Craftsmanship'
+  const description =
+    craftSettings?.description ||
+    'Our interiors are defined not merely by visual proportion, but by tactile authenticity — honed marbles, aged metals, hand-planed teak, and museum-grade handloom textiles sourced across the Indian subcontinent.'
+  const quote =
+    craftSettings?.quote ||
+    'Luxury is the honest soul of authentic stone and hand-sculpted grain.'
+
   return (
     <SectionShell
       id="craftsmanship"
@@ -334,17 +411,14 @@ export function MaterialCraftsmanship() {
           <div className="flex items-center gap-3">
             <span className="h-px w-8 bg-gold-700" aria-hidden />
             <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-gold-700">
-              Material Integrity
+              {overline}
             </span>
           </div>
           <h2 className="mt-5 font-serif text-[2.6rem] leading-[1.02] tracking-tight text-charcoal-900">
-            The <em className="italic text-gold-700">Art</em> of
-            <br />
-            Craftsmanship
+            {heading}
           </h2>
           <p className="mt-5 max-w-[34ch] text-[15px] leading-relaxed text-charcoal-600">
-            Honed marbles, aged metals, hand-planed teak and handloom textiles — sourced across
-            the Indian subcontinent.
+            {description}
           </p>
         </header>
 
@@ -401,14 +475,14 @@ export function MaterialCraftsmanship() {
         {/* Closing note */}
         <div data-m-reveal className={`${mobileRevealClass} mt-16 border-t border-gold-500/40 pt-8`}>
           <p className="font-serif italic text-[1.2rem] leading-snug text-charcoal-800">
-            “Luxury is the honest soul of authentic stone and hand-sculpted grain.”
+            “{quote}”
           </p>
           <button
             type="button"
-            onClick={() => navigate('/services')}
-            className="mt-6 inline-flex items-center gap-2 border-b border-gold-700 pb-1 text-[13px] font-medium tracking-wide text-charcoal-900"
+            onClick={() => navigate('/projects')}
+            className="mt-6 inline-flex items-center gap-2 border-b border-gold-700 pb-1 text-[13px] font-medium tracking-wide text-charcoal-900 cursor-pointer"
           >
-            Explore Atelier Disciplines
+            Explore Portfolio Residences
             <HiOutlineChevronRight className="size-3.5 text-gold-700" />
           </button>
         </div>
@@ -419,18 +493,18 @@ export function MaterialCraftsmanship() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between border-b border-white/10 pb-8 sm:pb-12">
           <SectionHeader
             dark
-            overline="Material Integrity"
-            title="The Art of Craftsmanship"
-            description="Our interiors are defined not merely by visual proportion, but by tactile authenticity — honed marbles, aged metals, hand-planed teak, and museum-grade handloom textiles sourced across the Indian subcontinent."
+            overline={overline}
+            title={heading}
+            description={description}
           />
 
           <div data-reveal className="relative z-10 shrink-0 flex items-center gap-3">
             <Button
               variant="outline-ivory"
               className="group gap-2 border-white/20 text-ivory-50 hover:bg-white/10 hover:border-gold-400"
-              onClick={() => navigate('/services')}
+              onClick={() => navigate('/projects')}
             >
-              <span>Explore Atelier Disciplines</span>
+              <span>Explore Portfolio Residences</span>
               <HiOutlineChevronRight
                 className="size-4 transition-transform group-hover:translate-x-1"
                 aria-hidden
@@ -884,7 +958,7 @@ export function MaterialCraftsmanship() {
                     className="w-full sm:w-auto gap-2"
                     onClick={() => {
                       closeInspector()
-                      navigate('/services')
+                      navigate('/contact')
                     }}
                   >
                     <span>Inquire for Custom Residence</span>

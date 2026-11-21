@@ -23,6 +23,7 @@ type AuthContextValue = {
   isLocalMode: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
+  updateUserEmail: (newEmail: string) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -83,6 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLocalEmail(null)
   }, [])
 
+  const updateUserEmail = useCallback((newEmail: string) => {
+    setLocalEmail(newEmail)
+  }, [])
+
   const value = useMemo(
     () => ({
       session,
@@ -92,8 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLocalMode,
       login,
       logout,
+      updateUserEmail,
     }),
-    [session, localEmail, isLoading, isLocalMode, login, logout],
+    [session, localEmail, isLoading, isLocalMode, login, logout, updateUserEmail],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

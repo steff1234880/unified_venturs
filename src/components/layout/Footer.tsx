@@ -57,14 +57,14 @@ export function Footer() {
 
             <SocialLinks
               className="mt-8"
-              links={(['instagram', 'pinterest', 'linkedin', 'facebook'] as const).map(
+              links={(['instagram', 'facebook'] as const).map(
                 (platform) => ({
                   platform,
                   label: platform.charAt(0).toUpperCase() + platform.slice(1),
-                  href: siteSettings.social[platform].url.trim(),
+                  href: siteSettings.social[platform]?.url?.trim() ?? '',
                   enabled:
-                    siteSettings.social[platform].enabled &&
-                    siteSettings.social[platform].url.trim().length > 0,
+                    Boolean(siteSettings.social[platform]?.enabled) &&
+                    (siteSettings.social[platform]?.url?.trim()?.length ?? 0) > 0,
                 }),
               )}
             />

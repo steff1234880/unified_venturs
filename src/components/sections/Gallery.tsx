@@ -1,15 +1,43 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
+import { fetchCollection } from '@/admin/storage'
+import type { AdminGalleryItem } from '@/admin/types'
 import { useSectionReveal } from '@/hooks'
 import { gsap } from '@/lib/gsap'
 import { cn } from '@/utils'
 
-import { galleryImages } from './data/home.data'
+import { galleryImages as defaultGalleryImages } from './data/home.data'
 import { SectionHeader, SectionShell } from './shared/SectionHeader'
 
 export function Gallery() {
   const sectionRef = useSectionReveal<HTMLElement>({ stagger: 0.08, y: 60 })
   const itemsRef = useRef<(HTMLDivElement | null)[]>([])
+  const [images, setImages] = useState<Array<{ src: string; alt: string; tall?: boolean }>>([
+    ...defaultGalleryImages,
+  ])
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadGallery() {
+      try {
+        const stored = (await fetchCollection('gallery')) as AdminGalleryItem[]
+        if (cancelled || !Array.isArray(stored) || stored.length === 0) return
+        setImages(
+          stored.map((item) => ({
+            src: item.src,
+            alt: item.alt,
+            tall: Boolean(item.tall),
+          })),
+        )
+      } catch {
+        // Retain default images
+      }
+    }
+    void loadGallery()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useLayoutEffect(() => {
     const section = sectionRef.current
@@ -61,9 +89,9 @@ export function Gallery() {
         />
 
         <div className="mt-10 sm:mt-14 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-          {galleryImages.map((image, index) => (
+          {images.map((image, index) => (
             <div
-              key={image.src}
+              key={`${image.src}-${index}`}
               data-reveal
               ref={(el) => {
                 itemsRef.current[index] = el

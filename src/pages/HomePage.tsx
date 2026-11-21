@@ -7,7 +7,6 @@ import {
   Gallery,
   Hero,
   MaterialCraftsmanship,
-  Services,
   Stats,
   Testimonials,
   WhyChooseUs,
@@ -38,7 +37,6 @@ export function HomePage() {
       <JsonLd data={organizationSchema} />
       <Hero />
       <Stats />
-      <Services />
       <FeaturedProjects />
       <MaterialCraftsmanship />
       <BeforeAfter />

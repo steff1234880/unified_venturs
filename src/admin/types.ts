@@ -133,9 +133,23 @@ export type AdminSession = {
   expiresAt: number
 }
 
+export type AdminCraftsmanshipItem = BaseEntity & {
+  discipline: string
+  material: string
+  title: string
+  caption: string
+  provenance: string
+  finish: string
+  image: string
+  order?: number
+  published?: boolean
+  aspectRatio?: string
+}
+
 export type AdminStore = {
   projects: AdminProject[]
   gallery: AdminGalleryItem[]
+  craftsmanship: AdminCraftsmanshipItem[]
   services: AdminService[]
   testimonials: AdminTestimonial[]
   faqs: AdminFaq[]

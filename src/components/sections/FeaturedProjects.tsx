@@ -14,6 +14,7 @@ import { gsap } from '@/lib/gsap'
 import { A11y, Navigation, Pagination } from '@/lib/swiper'
 import { Swiper, SwiperSlide } from '@/lib/swiper'
 import { cn } from '@/utils'
+import { getProjectImagePlaceholder } from '@/utils/project-placeholder'
 
 import { projects as defaultProjects } from './data/home.data'
 import { SectionHeader, SectionShell } from './shared/SectionHeader'
@@ -50,7 +51,7 @@ export function FeaturedProjects() {
               title: p.title,
               location: p.location,
               category: p.category,
-              image: p.image || '/placeholders/prestige-park-square.svg',
+              image: p.image || getProjectImagePlaceholder(p.title),
               beforeImage: p.beforeImage || '/images/before-living-room.jpg',
               afterImage: p.afterImage || p.image || '/images/after-living-room.jpg',
               transformationStory: p.description || '',
@@ -186,6 +187,12 @@ export function FeaturedProjects() {
                         height={750}
                         decoding="async"
                         loading="lazy"
+                        onError={(e) => {
+                          const fallback = getProjectImagePlaceholder(project.title)
+                          if ((e.currentTarget as HTMLImageElement).src !== fallback) {
+                            ;(e.currentTarget as HTMLImageElement).src = fallback
+                          }
+                        }}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                       />
                     </div>

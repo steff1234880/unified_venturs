@@ -12,6 +12,35 @@ export type ContactSubmission = {
 }
 
 export async function submitContactMessage(data: ContactSubmission) {
+  // Try real database backend API first
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+
+    if (res.ok) {
+      // Also update local store if in local admin mode for instant cache parity
+      if (isLocalAdminMode()) {
+        void addContactMessage(data).catch(() => {})
+      }
+      return
+    }
+
+    const json = await res.json().catch(() => ({}))
+    if (res.status === 400 && json?.error) {
+      throw new Error(json.error)
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('recently received')) {
+      throw err
+    }
+    // If backend endpoint is unavailable, fallback to configured Supabase or local storage
+  }
+
   if (isLocalAdminMode()) {
     await addContactMessage(data)
     return
@@ -33,3 +62,4 @@ export async function submitContactMessage(data: ContactSubmission) {
     throw new Error(error.message)
   }
 }
+

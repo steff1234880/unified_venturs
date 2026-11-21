@@ -35,9 +35,6 @@ const HomePage = lazy(() =>
 const ProjectsPage = lazy(() =>
   import('@/pages/ProjectsPage').then((module) => ({ default: module.ProjectsPage })),
 )
-const ServicesPage = lazy(() =>
-  import('@/pages/ServicesPage').then((module) => ({ default: module.ServicesPage })),
-)
 
 const AdminLayout = lazy(() =>
   import('@/admin/layout/AdminLayout').then((module) => ({
@@ -62,6 +59,11 @@ const AdminProjectsPage = lazy(() =>
 const AdminGalleryPage = lazy(() =>
   import('@/admin/pages/GalleryPage').then((module) => ({
     default: module.AdminGalleryPage,
+  })),
+)
+const AdminCraftsmanshipPage = lazy(() =>
+  import('@/admin/pages/CraftsmanshipPage').then((module) => ({
+    default: module.AdminCraftsmanshipPage,
   })),
 )
 const AdminServicesPage = lazy(() =>
@@ -99,6 +101,11 @@ const AdminSettingsPage = lazy(() =>
     default: module.AdminSettingsPage,
   })),
 )
+const AdminAccountPage = lazy(() =>
+  import('@/admin/pages/AccountPage').then((module) => ({
+    default: module.AdminAccountPage,
+  })),
+)
 
 function withSuspense(element: ReactNode) {
   return <Suspense fallback={<PageLoader />}>{element}</Suspense>
@@ -111,7 +118,6 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: withSuspense(<HomePage />) },
       { path: 'about', element: withSuspense(<AboutPage />) },
-      { path: 'services', element: withSuspense(<ServicesPage />) },
       { path: 'projects', element: withSuspense(<ProjectsPage />) },
       { path: 'gallery', element: withSuspense(<GalleryPage />) },
       { path: 'contact', element: withSuspense(<ContactPage />) },
@@ -137,11 +143,13 @@ export const router = createBrowserRouter([
               { path: 'notepad', element: withSuspense(<AdminNotepadPage />) },
               { path: 'projects', element: withSuspense(<AdminProjectsPage />) },
               { path: 'gallery', element: withSuspense(<AdminGalleryPage />) },
+              { path: 'craftsmanship', element: withSuspense(<AdminCraftsmanshipPage />) },
               { path: 'services', element: withSuspense(<AdminServicesPage />) },
               { path: 'testimonials', element: withSuspense(<AdminTestimonialsPage />) },
               { path: 'faq', element: withSuspense(<AdminFaqPage />) },
               { path: 'messages', element: withSuspense(<AdminMessagesPage />) },
               { path: 'settings', element: withSuspense(<AdminSettingsPage />) },
+              { path: 'account', element: withSuspense(<AdminAccountPage />) },
             ],
           },
         ],

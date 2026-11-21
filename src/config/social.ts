@@ -1,8 +1,6 @@
 import {
   FaFacebookF,
   FaInstagram,
-  FaLinkedinIn,
-  FaPinterestP,
 } from 'react-icons/fa'
 import type { IconType } from 'react-icons'
 
@@ -11,7 +9,7 @@ const getEnv = (key: keyof ImportMetaEnv, fallback = '') => {
   return typeof value === 'string' && value.length > 0 ? value : fallback
 }
 
-export type SocialPlatform = 'instagram' | 'pinterest' | 'linkedin' | 'facebook'
+export type SocialPlatform = 'instagram' | 'facebook'
 
 export type SocialLinkItem = {
   platform: SocialPlatform
@@ -36,8 +34,6 @@ export type SocialLinksConfig = {
 
 export const socialIconMap: Record<SocialPlatform, IconType> = {
   instagram: FaInstagram,
-  pinterest: FaPinterestP,
-  linkedin: FaLinkedinIn,
   facebook: FaFacebookF,
 }
 
@@ -48,18 +44,6 @@ export const socialLinksConfig: SocialLinksConfig = {
       label: 'Instagram',
       href: getEnv('VITE_SOCIAL_INSTAGRAM_URL', 'https://instagram.com/intereor'),
       enabled: getEnv('VITE_SOCIAL_INSTAGRAM_ENABLED', 'true') !== 'false',
-    },
-    {
-      platform: 'pinterest',
-      label: 'Pinterest',
-      href: getEnv('VITE_SOCIAL_PINTEREST_URL', 'https://pinterest.com/intereor'),
-      enabled: getEnv('VITE_SOCIAL_PINTEREST_ENABLED', 'true') !== 'false',
-    },
-    {
-      platform: 'linkedin',
-      label: 'LinkedIn',
-      href: getEnv('VITE_SOCIAL_LINKEDIN_URL', 'https://linkedin.com/company/intereor'),
-      enabled: getEnv('VITE_SOCIAL_LINKEDIN_ENABLED', 'true') !== 'false',
     },
     {
       platform: 'facebook',

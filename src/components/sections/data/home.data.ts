@@ -51,9 +51,11 @@ export const projects = [
     title: 'Kolte Patil i-Towers',
     location: 'Bengaluru, Karnataka',
     category: 'Completed Residence',
-    image: '/placeholders/kolte-patil-i-towers.svg',
+    image:
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80',
     beforeImage: '/images/before-living-room.jpg',
-    afterImage: '/images/after-living-room.jpg',
+    afterImage:
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80',
     transformationStory:
       'Refined urban high-rise living with seamless spatial layout, warm architectural finishes, and bespoke cabinetry.',
   },
@@ -61,9 +63,11 @@ export const projects = [
     title: 'Brigade Cornerstone Utopia',
     location: 'Bengaluru, Karnataka',
     category: 'Completed Residence',
-    image: '/placeholders/brigade-cornerstone-utopia.svg',
+    image:
+      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80',
     beforeImage: '/images/before-living-room.jpg',
-    afterImage: '/images/after-living-room.jpg',
+    afterImage:
+      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80',
     transformationStory:
       'Contemporary apartment tailored with tactile materials, acoustic textiles, and bespoke joinery details.',
   },
@@ -71,9 +75,11 @@ export const projects = [
     title: 'Bren Zahara',
     location: 'Bengaluru, Karnataka',
     category: 'Completed Residence',
-    image: '/placeholders/bren-zahara.svg',
+    image:
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
     beforeImage: '/images/before-living-room.jpg',
-    afterImage: '/images/after-living-room.jpg',
+    afterImage:
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
     transformationStory:
       'Curated residence blending organic textures, understated luxury, and tailored interior architecture.',
   },
@@ -81,9 +87,11 @@ export const projects = [
     title: 'Alpine Viva',
     location: 'Bengaluru, Karnataka',
     category: 'Completed Residence',
-    image: '/placeholders/alpine-viva.svg',
+    image:
+      'https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80',
     beforeImage: '/images/before-living-room.jpg',
-    afterImage: '/images/after-living-room.jpg',
+    afterImage:
+      'https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80',
     transformationStory:
       'Turnkey residential transformation finished with authentic stone accents, warm woods, and serene palette.',
   },
@@ -225,7 +233,6 @@ export const faqs = [
 export const footerLinks = {
   explore: [
     { label: 'About', href: '/about' },
-    { label: 'Services', href: '/services' },
     { label: 'Projects', href: '/projects' },
   ],
   company: [

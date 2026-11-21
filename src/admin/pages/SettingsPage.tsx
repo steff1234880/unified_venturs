@@ -15,17 +15,16 @@ import { socialIconMap, type SocialPlatform } from '@/config/social'
 import {
   DEFAULT_BEFORE_AFTER,
   DEFAULT_CONTACT_PERSONS,
+  DEFAULT_CRAFTSMANSHIP,
   getLogoSources,
   SOCIAL_PLATFORMS,
   validateSocialUrl,
 } from '@/lib/site-settings'
 import { Button, FormField, Input, Textarea } from '@/components/ui'
-import type { ContactPerson, SocialSettings } from '@/types/site-settings'
+import type { ContactPerson, CraftsmanshipPillarSetting, CraftsmanshipSettings, SocialSettings } from '@/types/site-settings'
 
 const socialLabels: Record<SocialPlatform, { label: string; placeholder: string }> = {
   instagram: { label: 'Instagram URL', placeholder: 'https://instagram.com/yourprofile' },
-  pinterest: { label: 'Pinterest URL', placeholder: 'https://pinterest.com/yourprofile' },
-  linkedin: { label: 'LinkedIn URL', placeholder: 'https://linkedin.com/company/yourcompany' },
   facebook: { label: 'Facebook URL', placeholder: 'https://facebook.com/yourpage' },
 }
 
@@ -47,6 +46,7 @@ export function AdminSettingsPage() {
     beforeAfterDescription: DEFAULT_BEFORE_AFTER.description,
     beforeAfterBeforeImage: DEFAULT_BEFORE_AFTER.beforeImage,
     beforeAfterAfterImage: DEFAULT_BEFORE_AFTER.afterImage,
+    craftsmanship: DEFAULT_CRAFTSMANSHIP as CraftsmanshipSettings,
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -90,6 +90,7 @@ export function AdminSettingsPage() {
               settings.beforeAfterBeforeImage || DEFAULT_BEFORE_AFTER.beforeImage,
             beforeAfterAfterImage:
               settings.beforeAfterAfterImage || DEFAULT_BEFORE_AFTER.afterImage,
+            craftsmanship: settings.craftsmanship || DEFAULT_CRAFTSMANSHIP,
           })
         }
       } catch (err) {
@@ -727,7 +728,287 @@ export function AdminSettingsPage() {
             })}
           </fieldset>
 
-          {/* 5. Location */}
+          {/* 5. Craftsmanship Section Management */}
+          <fieldset className="space-y-6 rounded-lg border border-border p-4 sm:p-6 bg-white shadow-xs">
+            <legend className="flex items-center gap-2 px-1 text-heading-sm font-semibold text-charcoal-900">
+              <HiOutlineSparkles className="size-5 text-gold-500" />
+              Craftsmanship Section Management
+            </legend>
+            <p className="text-body-sm text-muted-foreground">
+              Manage the public home page Craftsmanship section, heading, editorial story, quote, and individual material discipline specimens.
+            </p>
+
+            <div className="flex items-center gap-3 py-2 border-b border-border/80">
+              <label className="flex items-center gap-2.5 cursor-pointer text-body-sm font-medium text-charcoal-900">
+                <input
+                  type="checkbox"
+                  checked={form.craftsmanship?.enabled !== false}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      craftsmanship: { ...prev.craftsmanship, enabled: e.target.checked },
+                    }))
+                  }
+                  className="size-5 accent-gold-500"
+                />
+                Show Craftsmanship section on public website
+              </label>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField id="craft-overline" label="Section Overline">
+                <Input
+                  value={form.craftsmanship?.overline || ''}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      craftsmanship: { ...prev.craftsmanship, overline: e.target.value },
+                    }))
+                  }
+                  placeholder="Material Integrity"
+                />
+              </FormField>
+
+              <FormField id="craft-heading" label="Section Heading">
+                <Input
+                  value={form.craftsmanship?.heading || ''}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      craftsmanship: { ...prev.craftsmanship, heading: e.target.value },
+                    }))
+                  }
+                  placeholder="The Art of Craftsmanship"
+                />
+              </FormField>
+            </div>
+
+            <FormField id="craft-desc" label="Editorial Description">
+              <Textarea
+                rows={3}
+                value={form.craftsmanship?.description || ''}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    craftsmanship: { ...prev.craftsmanship, description: e.target.value },
+                  }))
+                }
+                placeholder="Our interiors are defined not merely by visual proportion, but by tactile authenticity..."
+              />
+            </FormField>
+
+            <FormField id="craft-quote" label="Closing Quote">
+              <Input
+                value={form.craftsmanship?.quote || ''}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    craftsmanship: { ...prev.craftsmanship, quote: e.target.value },
+                  }))
+                }
+                placeholder="Luxury is the honest soul of authentic stone and hand-sculpted grain."
+              />
+            </FormField>
+
+            {/* Individual Material Pillars / Disciplines */}
+            <div className="pt-4 border-t border-border/80 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-body-sm font-semibold text-charcoal-900">
+                    Craftsmanship Disciplines & Materials ({form.craftsmanship?.pillars?.length || 0})
+                  </h4>
+                  <p className="text-caption text-muted-foreground">
+                    Edit photos, materials, provenance, and descriptions for each discipline.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const newPillar: CraftsmanshipPillarSetting = {
+                      id: 'pillar_' + Date.now().toString(36),
+                      discipline: 'Artisanal Craft',
+                      material: 'Handcrafted Materials',
+                      title: 'Bespoke Architectural Detail',
+                      caption: 'Exquisite architectural texture crafted by master guilds.',
+                      provenance: 'Dedicated Artisans',
+                      finish: 'Hand-Finished & Honed',
+                      image: '/images/after-living-room.jpg',
+                      aspectRatio: 'aspect-4/3',
+                    }
+                    setForm((prev) => ({
+                      ...prev,
+                      craftsmanship: {
+                        ...prev.craftsmanship,
+                        pillars: [...(prev.craftsmanship?.pillars || []), newPillar],
+                      },
+                    }))
+                  }}
+                  className="gap-1.5 text-xs"
+                >
+                  <HiOutlinePlus className="size-4" />
+                  Add Discipline
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {(form.craftsmanship?.pillars || []).map((pillar, idx) => (
+                  <div
+                    key={pillar.id || idx}
+                    className="p-4 rounded-lg border border-border/80 bg-muted/20 space-y-4"
+                  >
+                    <div className="flex items-center justify-between border-b border-border/60 pb-2">
+                      <span className="font-mono text-xs uppercase tracking-wider text-gold-600 font-semibold">
+                        Specimen {String(idx + 1).padStart(2, '0')} — {pillar.discipline}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setForm((prev) => ({
+                            ...prev,
+                            craftsmanship: {
+                              ...prev.craftsmanship,
+                              pillars: prev.craftsmanship.pillars.filter((_, pIdx) => pIdx !== idx),
+                            },
+                          }))
+                        }}
+                        className="text-xs text-destructive hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <HiOutlineTrash className="size-3.5" />
+                        Remove
+                      </button>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <FormField id={`craft-discipline-${idx}`} label="Discipline">
+                        <Input
+                          value={pillar.discipline}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setForm((prev) => {
+                              const next = [...prev.craftsmanship.pillars]
+                              const currentPillar = next[idx]
+                              if (currentPillar) {
+                                next[idx] = { ...currentPillar, discipline: val }
+                              }
+                              return { ...prev, craftsmanship: { ...prev.craftsmanship, pillars: next } }
+                            })
+                          }}
+                        />
+                      </FormField>
+
+                      <FormField id={`craft-title-${idx}`} label="Title">
+                        <Input
+                          value={pillar.title}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setForm((prev) => {
+                              const next = [...prev.craftsmanship.pillars]
+                              const currentPillar = next[idx]
+                              if (currentPillar) {
+                                next[idx] = { ...currentPillar, title: val }
+                              }
+                              return { ...prev, craftsmanship: { ...prev.craftsmanship, pillars: next } }
+                            })
+                          }}
+                        />
+                      </FormField>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <FormField id={`craft-mat-${idx}`} label="Material">
+                        <Input
+                          value={pillar.material}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setForm((prev) => {
+                              const next = [...prev.craftsmanship.pillars]
+                              const currentPillar = next[idx]
+                              if (currentPillar) {
+                                next[idx] = { ...currentPillar, material: val }
+                              }
+                              return { ...prev, craftsmanship: { ...prev.craftsmanship, pillars: next } }
+                            })
+                          }}
+                        />
+                      </FormField>
+
+                      <FormField id={`craft-prov-${idx}`} label="Provenance">
+                        <Input
+                          value={pillar.provenance}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setForm((prev) => {
+                              const next = [...prev.craftsmanship.pillars]
+                              const currentPillar = next[idx]
+                              if (currentPillar) {
+                                next[idx] = { ...currentPillar, provenance: val }
+                              }
+                              return { ...prev, craftsmanship: { ...prev.craftsmanship, pillars: next } }
+                            })
+                          }}
+                        />
+                      </FormField>
+
+                      <FormField id={`craft-finish-${idx}`} label="Finish">
+                        <Input
+                          value={pillar.finish}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            setForm((prev) => {
+                              const next = [...prev.craftsmanship.pillars]
+                              const currentPillar = next[idx]
+                              if (currentPillar) {
+                                next[idx] = { ...currentPillar, finish: val }
+                              }
+                              return { ...prev, craftsmanship: { ...prev.craftsmanship, pillars: next } }
+                            })
+                          }}
+                        />
+                      </FormField>
+                    </div>
+
+                    <FormField id={`craft-caption-${idx}`} label="Description / Caption">
+                      <Input
+                        value={pillar.caption}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          setForm((prev) => {
+                            const next = [...prev.craftsmanship.pillars]
+                            const currentPillar = next[idx]
+                            if (currentPillar) {
+                              next[idx] = { ...currentPillar, caption: val }
+                            }
+                            return { ...prev, craftsmanship: { ...prev.craftsmanship, pillars: next } }
+                          })
+                        }}
+                      />
+                    </FormField>
+
+                    <ImageUpload
+                      id={`craft-img-${idx}`}
+                      label="Specimen Photograph"
+                      folder="craftsmanship"
+                      value={pillar.image}
+                      onChange={(imgUrl) => {
+                        setForm((prev) => {
+                          const next = [...prev.craftsmanship.pillars]
+                          const currentPillar = next[idx]
+                          if (currentPillar) {
+                            next[idx] = { ...currentPillar, image: imgUrl }
+                          }
+                          return { ...prev, craftsmanship: { ...prev.craftsmanship, pillars: next } }
+                        })
+                      }}
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </fieldset>
+
+          {/* 6. Location */}
           <FormField id="settings-location" label="Location" required>
             <Textarea
               value={form.location}

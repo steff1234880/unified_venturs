@@ -1,5 +1,8 @@
 import { createSeedStore } from '@/admin/seed'
 import type {
+  AdminCraftsmanshipItem,
+  AdminGalleryItem,
+  AdminProject,
   AdminStore,
   BaseEntity,
   CollectionKey,
@@ -9,109 +12,414 @@ import { createId, nowIso } from '@/admin/utils'
 
 const STORAGE_KEY = 'intereor-admin-store'
 
+export const ADMIN_STORE_UPDATED_EVENT = 'intereor:admin-store-updated'
+
+const ALL_COLLECTIONS: CollectionKey[] = [
+  'projects',
+  'gallery',
+  'craftsmanship',
+  'services',
+  'testimonials',
+  'faqs',
+  'messages',
+  'notes',
+  'invoices',
+]
+
+/**
+ * Safely saves data into localStorage, stripping any accidental large data: URLs
+ * or catching quota errors gracefully without crashing the app.
+ */
+function safeSetLocalStorage(key: string, value: string): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    localStorage.setItem(key, value)
+    return true
+  } catch (err: any) {
+    console.warn('[Storage] Quota exceeded or failed setItem for key:', key, err?.message)
+    try {
+      const parsed = JSON.parse(value)
+      if (parsed.projects && Array.isArray(parsed.projects)) {
+        parsed.projects = parsed.projects.map((p: any) => ({
+          ...p,
+          image: p.image?.startsWith('data:') ? '/images/after-living-room.jpg' : p.image,
+          beforeImage: p.beforeImage?.startsWith('data:') ? '/images/before-living-room.jpg' : p.beforeImage,
+          afterImage: p.afterImage?.startsWith('data:') ? '/images/after-living-room.jpg' : p.afterImage,
+          images: Array.isArray(p.images)
+            ? p.images.map((img: string) => (img?.startsWith('data:') ? '/images/after-living-room.jpg' : img))
+            : p.images,
+        }))
+      }
+      if (parsed.gallery && Array.isArray(parsed.gallery)) {
+        parsed.gallery = parsed.gallery.map((g: any) => ({
+          ...g,
+          src: g.src?.startsWith('data:') ? '/images/after-living-room.jpg' : g.src,
+        }))
+      }
+      localStorage.setItem(key, JSON.stringify(parsed))
+      return true
+    } catch {
+      return false
+    }
+  }
+}
+
 function readStore(): AdminStore {
-  const raw = localStorage.getItem(STORAGE_KEY)
+  const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
 
   if (!raw) {
     const seed = createSeedStore()
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seed))
+    if (typeof window !== 'undefined') {
+      safeSetLocalStorage(STORAGE_KEY, JSON.stringify(seed))
+    }
     return seed
   }
 
   try {
     const parsed = JSON.parse(raw) as AdminStore
     let modified = false
+    const seed = createSeedStore()
 
-    if (!Array.isArray(parsed.notes)) {
-      parsed.notes = createSeedStore().notes || []
-      modified = true
-    }
-
-    if (!Array.isArray(parsed.invoices)) {
-      parsed.invoices = createSeedStore().invoices || []
-      modified = true
-    }
-
-    // Migration: ensure verified Bengaluru work locations are synced into existing store and purge old unverified demo projects
-    if (parsed.projects && Array.isArray(parsed.projects)) {
-      const seed = createSeedStore()
-      const seedTitles = new Set(seed.projects.map((p) => p.title.toLowerCase()))
-
-      // Cleanse non-Bengaluru / demo projects from older stored state
-      const initialCount = parsed.projects.length
-      parsed.projects = parsed.projects.filter((p) => seedTitles.has(p.title.toLowerCase()))
-      if (parsed.projects.length !== initialCount) {
+    // Ensure all collections exist as arrays to prevent undefined errors
+    for (const key of ALL_COLLECTIONS) {
+      if (!Array.isArray(parsed[key])) {
+        parsed[key] = (seed[key] || []) as any
         modified = true
       }
+    }
 
-      // Check if any verified project from seed is missing in current store
+    if (parsed.projects && Array.isArray(parsed.projects)) {
+      parsed.projects = parsed.projects.map((proj) => {
+        let dirty = false
+        let img = proj.image
+        if (img?.startsWith('data:')) {
+          img = '/images/after-living-room.jpg'
+          dirty = true
+        }
+
+        let images = proj.images
+        if (Array.isArray(images)) {
+          const sanitizedImages = images.map((i) => (i?.startsWith('data:') ? '/images/after-living-room.jpg' : i))
+          if (JSON.stringify(sanitizedImages) !== JSON.stringify(images)) {
+            images = sanitizedImages
+            dirty = true
+          }
+        }
+
+        if (dirty) {
+          modified = true
+          return { ...proj, image: img, images }
+        }
+        return proj
+      })
+
       for (const seedProject of seed.projects) {
-        const exists = parsed.projects.some((p) => p.title.toLowerCase() === seedProject.title.toLowerCase())
+        const exists = parsed.projects.some(
+          (p) => p.title.toLowerCase() === seedProject.title.toLowerCase() || p.id === seedProject.id,
+        )
         if (!exists) {
           parsed.projects.push(seedProject)
           modified = true
         }
       }
-
-      parsed.projects = parsed.projects.map((proj) => {
-        // Upgrade Prestige Park Square to verified completed photography if pointing to old placeholder
-        if (
-          proj.title.toLowerCase().includes('prestige park square') &&
-          (!proj.image || proj.image.endsWith('.svg') || proj.image.includes('placeholder'))
-        ) {
-          proj.image = '/images/after-living-room.jpg'
-          if (!proj.images || proj.images.length === 0 || proj.images[0]?.endsWith('.svg')) {
-            proj.images = ['/images/after-living-room.jpg', '/placeholders/prestige-park-square.svg']
-          }
-          modified = true
-        }
-
-        if (!proj.beforeImage) {
-          const match = seed.projects.find((p) => p.title === proj.title)
-          if (match?.beforeImage) {
-            modified = true
-            return {
-              ...proj,
-              beforeImage: match.beforeImage,
-              afterImage: proj.afterImage || match.afterImage || proj.image,
-              isTransformation: proj.isTransformation ?? true,
-            }
-          }
-        }
-        return proj
-      })
-      if (modified) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed))
-      }
     }
+
+    if (parsed.gallery && Array.isArray(parsed.gallery)) {
+      parsed.gallery = parsed.gallery.map((g) => {
+        if (g.src?.startsWith('data:')) {
+          modified = true
+          return { ...g, src: '/images/after-living-room.jpg' }
+        }
+        return g
+      })
+    }
+
+    if (modified) {
+      safeSetLocalStorage(STORAGE_KEY, JSON.stringify(parsed))
+    }
+
     return parsed
   } catch {
     const seed = createSeedStore()
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seed))
+    safeSetLocalStorage(STORAGE_KEY, JSON.stringify(seed))
     return seed
   }
 }
 
 function writeStore(store: AdminStore) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
+  if (typeof window !== 'undefined') {
+    safeSetLocalStorage(STORAGE_KEY, JSON.stringify(store))
+    window.dispatchEvent(new CustomEvent(ADMIN_STORE_UPDATED_EVENT))
+  }
+}
+
+let hasMigratedLocalMessages = false
+let hasMigratedLocalProjects = false
+let hasMigratedLocalGallery = false
+let hasMigratedLocalCraftsmanship = false
+
+async function syncWithBackendCraftsmanship(): Promise<AdminCraftsmanshipItem[] | null> {
+  try {
+    const res = await fetch('/api/craftsmanship')
+    if (!res.ok) return null
+    const json = await res.json()
+    if (!json?.success || !Array.isArray(json?.items)) return null
+    const backendItems = json.items as AdminCraftsmanshipItem[]
+
+    if (!hasMigratedLocalCraftsmanship) {
+      hasMigratedLocalCraftsmanship = true
+      const store = readStore()
+      const backendIds = new Set(backendItems.map((c) => c.id))
+
+      if (Array.isArray(store.craftsmanship)) {
+        for (const localItem of store.craftsmanship) {
+          if (!backendIds.has(localItem.id)) {
+            void fetch('/api/craftsmanship', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(localItem),
+            }).catch(() => {})
+          }
+        }
+      }
+    }
+
+    return backendItems
+  } catch {
+    return null
+  }
+}
+
+async function syncWithBackendMessages(): Promise<ContactMessage[] | null> {
+  try {
+    const res = await fetch('/api/admin/messages')
+    if (!res.ok) return null
+    const json = await res.json()
+    if (!json?.success || !Array.isArray(json?.messages)) return null
+    const backendMessages = json.messages as ContactMessage[]
+
+    if (!hasMigratedLocalMessages) {
+      hasMigratedLocalMessages = true
+      const store = readStore()
+      const existingDbEmailsAndMsgs = new Set(
+        backendMessages.map((m) => `${m.email.toLowerCase()}|${m.message.trim()}`),
+      )
+
+      for (const localMsg of store.messages) {
+        const key = `${localMsg.email.toLowerCase()}|${localMsg.message.trim()}`
+        if (!existingDbEmailsAndMsgs.has(key)) {
+          void fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(localMsg),
+          }).catch(() => {})
+        }
+      }
+    }
+
+    return backendMessages
+  } catch {
+    return null
+  }
+}
+
+async function syncWithBackendProjects(): Promise<AdminProject[] | null> {
+  try {
+    const res = await fetch('/api/projects')
+    if (!res.ok) return null
+    const json = await res.json()
+    if (!json?.success || !Array.isArray(json?.projects)) return null
+    const backendProjects = json.projects as AdminProject[]
+
+    if (!hasMigratedLocalProjects) {
+      hasMigratedLocalProjects = true
+      const store = readStore()
+      const backendIds = new Set(backendProjects.map((p) => p.id))
+      const backendTitles = new Set(backendProjects.map((p) => p.title.toLowerCase().trim()))
+
+      for (const localProj of store.projects) {
+        if (!backendIds.has(localProj.id) && !backendTitles.has(localProj.title.toLowerCase().trim())) {
+          void fetch('/api/projects', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(localProj),
+          }).catch(() => {})
+        }
+      }
+    }
+
+    return backendProjects
+  } catch {
+    return null
+  }
+}
+
+async function syncWithBackendGallery(): Promise<AdminGalleryItem[] | null> {
+  try {
+    const res = await fetch('/api/gallery')
+    if (!res.ok) return null
+    const json = await res.json()
+    if (!json?.success || !Array.isArray(json?.gallery)) return null
+    const backendGallery = json.gallery as AdminGalleryItem[]
+
+    if (!hasMigratedLocalGallery) {
+      hasMigratedLocalGallery = true
+      const store = readStore()
+      const backendIds = new Set(backendGallery.map((g) => g.id))
+
+      for (const localGal of store.gallery) {
+        if (!backendIds.has(localGal.id)) {
+          void fetch('/api/gallery', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(localGal),
+          }).catch(() => {})
+        }
+      }
+    }
+
+    return backendGallery
+  } catch {
+    return null
+  }
 }
 
 export async function fetchCollection<K extends CollectionKey>(
   key: K,
 ): Promise<AdminStore[K]> {
-  const collection = readStore()[key]
+  if (key === 'messages') {
+    const backendMsgs = await syncWithBackendMessages()
+    if (backendMsgs) {
+      return backendMsgs as AdminStore[K]
+    }
+  }
+
+  if (key === 'projects') {
+    const backendProjects = await syncWithBackendProjects()
+    if (backendProjects && backendProjects.length > 0) {
+      const store = readStore()
+      store.projects = backendProjects
+      writeStore(store)
+      return [...backendProjects].sort(
+        (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
+      ) as AdminStore[K]
+    }
+  }
+
+  if (key === 'gallery') {
+    const backendGallery = await syncWithBackendGallery()
+    if (backendGallery && backendGallery.length > 0) {
+      const store = readStore()
+      store.gallery = backendGallery
+      writeStore(store)
+      return [...backendGallery].sort(
+        (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
+      ) as AdminStore[K]
+    }
+  }
+
+  if (key === 'craftsmanship') {
+    const backendCraft = await syncWithBackendCraftsmanship()
+    if (backendCraft && backendCraft.length > 0) {
+      const store = readStore()
+      store.craftsmanship = backendCraft
+      writeStore(store)
+      return [...backendCraft].sort(
+        (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
+      ) as AdminStore[K]
+    }
+  }
+
+  const store = readStore()
+  const collection = Array.isArray(store[key]) ? store[key] : ([] as unknown as AdminStore[K])
   if (key === 'projects' && Array.isArray(collection)) {
     return [...collection].sort(
       (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
     ) as AdminStore[K]
   }
-  return collection
+  if (key === 'gallery' && Array.isArray(collection)) {
+    return [...collection].sort(
+      (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
+    ) as AdminStore[K]
+  }
+  if (key === 'craftsmanship' && Array.isArray(collection)) {
+    return [...collection].sort(
+      (a: any, b: any) => (a.order ?? 0) - (b.order ?? 0),
+    ) as AdminStore[K]
+  }
+  return collection as AdminStore[K]
 }
 
 export async function createItem<K extends CollectionKey>(
   key: K,
   data: Omit<AdminStore[K][number], keyof BaseEntity>,
 ): Promise<AdminStore[K][number]> {
+  if (key === 'projects') {
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.project) {
+          const createdProj = json.project as AdminStore[K][number]
+          const store = readStore()
+          store.projects = [...(store.projects || []), createdProj as AdminProject]
+          writeStore(store)
+          return createdProj
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Projects] Backend API save failed, falling back to local store:', apiErr)
+    }
+  }
+
+  if (key === 'gallery') {
+    try {
+      const res = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.item) {
+          const createdGal = json.item as AdminStore[K][number]
+          const store = readStore()
+          store.gallery = [...(store.gallery || []), createdGal as AdminGalleryItem]
+          writeStore(store)
+          return createdGal
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Gallery] Backend API save failed, falling back to local store:', apiErr)
+    }
+  }
+
+  if (key === 'craftsmanship') {
+    try {
+      const res = await fetch('/api/craftsmanship', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.item) {
+          const createdCraft = json.item as AdminStore[K][number]
+          const store = readStore()
+          store.craftsmanship = [...(store.craftsmanship || []), createdCraft as AdminCraftsmanshipItem]
+          writeStore(store)
+          return createdCraft
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Craftsmanship] Backend API save failed, falling back to local store:', apiErr)
+    }
+  }
+
   const store = readStore()
   const timestamp = nowIso()
   const item = {
@@ -121,7 +429,8 @@ export async function createItem<K extends CollectionKey>(
     updatedAt: timestamp,
   } as AdminStore[K][number]
 
-  const collection = [...store[key], item] as AdminStore[K]
+  const existing = Array.isArray(store[key]) ? store[key] : []
+  const collection = [...existing, item] as AdminStore[K]
   writeStore({ ...store, [key]: collection })
 
   return item
@@ -132,6 +441,81 @@ export async function updateItem<K extends CollectionKey>(
   id: string,
   data: Partial<Omit<AdminStore[K][number], keyof BaseEntity>>,
 ): Promise<AdminStore[K][number]> {
+  if (key === 'projects') {
+    try {
+      const res = await fetch(`/api/projects/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.project) {
+          const updatedProj = json.project as AdminStore[K][number]
+          const store = readStore()
+          const index = (store.projects || []).findIndex((p) => p.id === id)
+          if (index !== -1) {
+            store.projects[index] = updatedProj as AdminProject
+            writeStore(store)
+          }
+          return updatedProj
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Projects] Backend API update failed, updating local store:', apiErr)
+    }
+  }
+
+  if (key === 'gallery') {
+    try {
+      const res = await fetch(`/api/gallery/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.item) {
+          const updatedGal = json.item as AdminStore[K][number]
+          const store = readStore()
+          const index = (store.gallery || []).findIndex((g) => g.id === id)
+          if (index !== -1) {
+            store.gallery[index] = updatedGal as AdminGalleryItem
+            writeStore(store)
+          }
+          return updatedGal
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Gallery] Backend API update failed, updating local store:', apiErr)
+    }
+  }
+
+  if (key === 'craftsmanship') {
+    try {
+      const res = await fetch(`/api/craftsmanship/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.item) {
+          const updatedCraft = json.item as AdminStore[K][number]
+          const store = readStore()
+          const index = (store.craftsmanship || []).findIndex((c) => c.id === id)
+          if (index !== -1) {
+            store.craftsmanship[index] = updatedCraft as AdminCraftsmanshipItem
+            writeStore(store)
+          }
+          return updatedCraft
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Craftsmanship] Backend API update failed, updating local store:', apiErr)
+    }
+  }
+
   const store = readStore()
   const index = store[key].findIndex((item) => item.id === id)
 
@@ -157,6 +541,30 @@ export async function deleteItem<K extends CollectionKey>(
   key: K,
   id: string,
 ): Promise<void> {
+  if (key === 'projects') {
+    try {
+      await fetch(`/api/projects/${id}`, { method: 'DELETE' })
+    } catch (apiErr) {
+      console.warn('[Projects] Backend API delete failed:', apiErr)
+    }
+  }
+
+  if (key === 'gallery') {
+    try {
+      await fetch(`/api/gallery/${id}`, { method: 'DELETE' })
+    } catch (apiErr) {
+      console.warn('[Gallery] Backend API delete failed:', apiErr)
+    }
+  }
+
+  if (key === 'craftsmanship') {
+    try {
+      await fetch(`/api/craftsmanship/${id}`, { method: 'DELETE' })
+    } catch (apiErr) {
+      console.warn('[Craftsmanship] Backend API delete failed:', apiErr)
+    }
+  }
+
   const store = readStore()
   const collection = store[key].filter((item) => item.id !== id) as AdminStore[K]
   writeStore({ ...store, [key]: collection })
@@ -172,23 +580,59 @@ export async function markMessageRead(
   id: string,
   read = true,
 ): Promise<ContactMessage> {
+  void fetch(`/api/admin/messages/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ read }),
+  }).catch(() => {})
+
   return updateItem('messages', id, { read })
 }
 
 export async function deleteMessage(id: string): Promise<void> {
+  void fetch(`/api/admin/messages/${id}`, {
+    method: 'DELETE',
+  }).catch(() => {})
+
   return deleteItem('messages', id)
 }
 
 export async function getDashboardStats() {
   const store = readStore()
 
+  let messagesCount = store.messages.length
+  let unreadCount = store.messages.filter((message) => !message.read).length
+  let projectsCount = store.projects.length
+  let galleryCount = store.gallery.length
+
+  try {
+    const res = await fetch('/api/admin/stats')
+    if (res.ok) {
+      const data = await res.json()
+      if (data?.success && data?.stats) {
+        messagesCount = data.stats.messages
+        unreadCount = data.stats.unreadMessages
+        if (typeof data.stats.projects === 'number') {
+          projectsCount = data.stats.projects
+        }
+        if (typeof data.stats.gallery === 'number') {
+          galleryCount = data.stats.gallery
+        }
+      }
+    }
+  } catch {
+    // fallback to store
+  }
+
   return {
-    projects: store.projects.length,
-    gallery: store.gallery.length,
+    projects: projectsCount,
+    gallery: galleryCount,
     services: store.services.length,
     testimonials: store.testimonials.length,
     faqs: store.faqs.length,
-    messages: store.messages.length,
-    unreadMessages: store.messages.filter((message) => !message.read).length,
+    messages: messagesCount,
+    notes: (store.notes || []).length,
+    invoices: (store.invoices || []).length,
+    unreadMessages: unreadCount,
   }
 }

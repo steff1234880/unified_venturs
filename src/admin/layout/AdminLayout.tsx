@@ -13,9 +13,11 @@ import {
   HiOutlineQuestionMarkCircle,
   HiOutlineSparkles,
   HiOutlineStar,
+  HiOutlineUserCircle,
   HiOutlineViewGrid,
   HiOutlineX,
 } from 'react-icons/hi'
+import { GiChisel } from 'react-icons/gi'
 
 import { Logo } from '@/components/common'
 import { useAuth } from '@/admin/auth/AuthProvider'
@@ -29,11 +31,13 @@ const navItems = [
   { to: '/admin/notepad', label: 'Notepad', icon: HiOutlineBookOpen },
   { to: '/admin/projects', label: 'Projects', icon: HiOutlineCollection },
   { to: '/admin/gallery', label: 'Gallery', icon: HiOutlinePhotograph },
+  { to: '/admin/craftsmanship', label: 'Craftsmanship', icon: GiChisel },
   { to: '/admin/services', label: 'Services', icon: HiOutlineSparkles },
   { to: '/admin/testimonials', label: 'Testimonials', icon: HiOutlineStar },
   { to: '/admin/faq', label: 'FAQ', icon: HiOutlineQuestionMarkCircle },
   { to: '/admin/messages', label: 'Messages', icon: HiOutlineChatAlt2 },
   { to: '/admin/settings', label: 'Site Settings', icon: HiOutlineCog },
+  { to: '/admin/account', label: 'Admin Account', icon: HiOutlineUserCircle },
 ] as const
 
 export function AdminSidebar({

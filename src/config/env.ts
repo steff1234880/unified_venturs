@@ -9,8 +9,6 @@ export const env = {
   appUrl: getEnv('VITE_APP_URL', 'http://localhost:5173'),
   supabaseUrl: getEnv('VITE_SUPABASE_URL'),
   supabaseAnonKey: getEnv('VITE_SUPABASE_ANON_KEY'),
-  adminEmail: getEnv('VITE_ADMIN_EMAIL', 'ajay123@gmail.com'),
-  adminPassword: getEnv('VITE_ADMIN_PASSWORD', '1234'),
   isDev: Boolean(import.meta?.env?.DEV),
   isProd: Boolean(import.meta?.env?.PROD),
 } as const

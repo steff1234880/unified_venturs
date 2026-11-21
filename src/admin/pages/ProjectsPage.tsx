@@ -164,18 +164,14 @@ export function AdminProjectsPage() {
     setFormError(null)
 
     const finalImages = form.images.length > 0 ? form.images : (form.image ? [form.image] : [])
-    const finalCover = form.image || finalImages[0] || ''
-
-    if (!finalCover) {
-      setFormError('Please provide at least one photo for the project.')
-      setSaving(false)
-      return
-    }
+    // Projects without an uploaded photo are allowed; default to authentic photo
+    const finalCover = form.image || finalImages[0] || getProjectImagePlaceholder(form.title)
+    const finalizedImages = finalImages.length > 0 ? finalImages : [finalCover]
 
     const payload = {
       ...form,
       image: finalCover,
-      images: finalImages,
+      images: finalizedImages,
     }
 
     try {
@@ -438,7 +434,7 @@ export function AdminProjectsPage() {
           <div className="rounded-lg border border-border/80 bg-muted/20 p-3.5 space-y-3">
             <ImageUpload
               id="project-primary-image"
-              label="Primary Cover Photo"
+              label="Primary Cover Photo (Optional - defaults to curated residence photo)"
               folder="projects"
               value={form.image}
               onChange={(imgUrl) => {
@@ -448,7 +444,7 @@ export function AdminProjectsPage() {
                   images: prev.images.includes(imgUrl) ? prev.images : [imgUrl, ...prev.images],
                 }))
               }}
-              required
+              required={false}
             />
 
             {/* Multiple Project Photos Gallery */}

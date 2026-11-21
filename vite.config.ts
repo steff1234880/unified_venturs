@@ -3,9 +3,23 @@ import { fileURLToPath } from 'node:url'
 
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
+
+import { createApiMiddleware } from './server/api-middleware.js'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
+
+function apiServerPlugin(): Plugin {
+  return {
+    name: 'api-server-middleware',
+    configureServer(server) {
+      server.middlewares.use(createApiMiddleware())
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(createApiMiddleware())
+    },
+  }
+}
 
 export default defineConfig(({ mode }) => {
   if (mode === 'production') {
@@ -19,7 +33,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), apiServerPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(dirname, './src'),

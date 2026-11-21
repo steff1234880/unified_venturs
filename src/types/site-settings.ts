@@ -13,6 +13,27 @@ export type ContactPerson = {
   phone: string
 }
 
+export type CraftsmanshipPillarSetting = {
+  id: string
+  discipline: string
+  material: string
+  title: string
+  caption: string
+  provenance: string
+  finish: string
+  image: string
+  aspectRatio?: string
+}
+
+export type CraftsmanshipSettings = {
+  enabled: boolean
+  overline: string
+  heading: string
+  description: string
+  quote: string
+  pillars: CraftsmanshipPillarSetting[]
+}
+
 export type SiteSettings = {
   email: string
   whatsappPhone: string
@@ -31,5 +52,7 @@ export type SiteSettings = {
   beforeAfterDescription?: string
   beforeAfterBeforeImage?: string
   beforeAfterAfterImage?: string
+  /** Craftsmanship Section Settings */
+  craftsmanship?: CraftsmanshipSettings
   updatedAt: string
 }

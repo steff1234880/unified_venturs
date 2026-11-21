@@ -1,5 +1,3 @@
-import { env } from '@/config/env'
-
 const SESSION_KEY = 'intereor-admin-session'
 const SESSION_DURATION_MS = 8 * 60 * 60 * 1000
 
@@ -35,23 +33,40 @@ export function getLocalSession(): LocalAdminSession | null {
 }
 
 export async function localLogin(email: string, password: string): Promise<LocalAdminSession> {
-  await new Promise((resolve) => setTimeout(resolve, 300))
+  const normalizedEmail = email.trim().toLowerCase()
 
-  const validEmail = email.trim().toLowerCase() === env.adminEmail.toLowerCase()
-  const validPassword = password === env.adminPassword
+  // Authenticate against backend API backed by SQLite admin_users table
+  const res = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: normalizedEmail, password }),
+  })
 
-  if (!validEmail || !validPassword) {
-    throw new Error('Invalid email or password.')
+  if (res.ok) {
+    const data = await res.json()
+    if (data.success && data.user) {
+      const session: LocalAdminSession = {
+        email: data.user.email,
+        expiresAt: Date.now() + SESSION_DURATION_MS,
+      }
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
+      return session
+    }
   }
 
-  const session: LocalAdminSession = {
-    email: email.trim().toLowerCase(),
-    expiresAt: Date.now() + SESSION_DURATION_MS,
+  const errData = await res.json().catch(() => ({}))
+  throw new Error(errData.error || 'Invalid email or password.')
+}
+
+export async function updateLocalAdminSession(newEmail: string): Promise<void> {
+  const current = getLocalSession()
+  if (current) {
+    const updated: LocalAdminSession = {
+      ...current,
+      email: newEmail.trim().toLowerCase(),
+    }
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(updated))
   }
-
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
-
-  return session
 }
 
 export async function localLogout(): Promise<void> {

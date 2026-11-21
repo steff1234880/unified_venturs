@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { ADMIN_STORE_UPDATED_EVENT } from '@/admin/api/local-storage'
 import {
   createItem,
   deleteItem,
@@ -54,8 +55,21 @@ export function useAdminCollection<K extends CollectionKey>(key: K) {
 
     void load()
 
+    const onStoreUpdate = () => {
+      void load()
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener(ADMIN_STORE_UPDATED_EVENT, onStoreUpdate)
+      window.addEventListener('storage', onStoreUpdate)
+    }
+
     return () => {
       cancelled = true
+      if (typeof window !== 'undefined') {
+        window.removeEventListener(ADMIN_STORE_UPDATED_EVENT, onStoreUpdate)
+        window.removeEventListener('storage', onStoreUpdate)
+      }
     }
   }, [key])
 
@@ -157,8 +171,21 @@ export function useDashboardStats() {
 
     void load()
 
+    const onStoreUpdate = () => {
+      void load()
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener(ADMIN_STORE_UPDATED_EVENT, onStoreUpdate)
+      window.addEventListener('storage', onStoreUpdate)
+    }
+
     return () => {
       cancelled = true
+      if (typeof window !== 'undefined') {
+        window.removeEventListener(ADMIN_STORE_UPDATED_EVENT, onStoreUpdate)
+        window.removeEventListener('storage', onStoreUpdate)
+      }
     }
   }, [])
 
