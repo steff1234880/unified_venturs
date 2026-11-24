@@ -32,20 +32,37 @@ export async function login(
 
   assertSupabaseConfigured()
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email.trim(),
-    password,
-  })
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    })
 
-  if (error) {
-    throw new Error(error.message)
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    if (!data.session) {
+      throw new Error('Login failed. Please try again.')
+    }
+
+    return data.session
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      const msg = err.message || ''
+      if (
+        msg.includes('Failed to fetch') ||
+        msg.includes('NetworkError') ||
+        msg.includes('fetch failed')
+      ) {
+        throw new Error(
+          'Unable to reach Supabase authentication server. Please check your internet connection and verify that VITE_SUPABASE_URL is correct and the Supabase project is active.',
+        )
+      }
+      throw err
+    }
+    throw new Error('Login failed. An unexpected error occurred.')
   }
-
-  if (!data.session) {
-    throw new Error('Login failed. Please try again.')
-  }
-
-  return data.session
 }
 
 export async function logout(): Promise<void> {

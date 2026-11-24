@@ -35,27 +35,60 @@ export function getLocalSession(): LocalAdminSession | null {
 export async function localLogin(email: string, password: string): Promise<LocalAdminSession> {
   const normalizedEmail = email.trim().toLowerCase()
 
-  // Authenticate against backend API backed by SQLite admin_users table
-  const res = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: normalizedEmail, password }),
-  })
+  // 1. Try local server backend API authentication backed by SQLite admin_users table
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: normalizedEmail, password }),
+    })
 
-  if (res.ok) {
-    const data = await res.json()
-    if (data.success && data.user) {
-      const session: LocalAdminSession = {
-        email: data.user.email,
-        expiresAt: Date.now() + SESSION_DURATION_MS,
+    const contentType = res.headers.get('content-type') || ''
+    if (contentType.includes('application/json')) {
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.success && data.user) {
+        const session: LocalAdminSession = {
+          email: data.user.email,
+          expiresAt: Date.now() + SESSION_DURATION_MS,
+        }
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
+        return session
       }
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
-      return session
+      if (data.error) {
+        throw new Error(data.error)
+      }
+    }
+  } catch (err: any) {
+    if (err instanceof Error && err.message !== 'Failed to fetch') {
+      throw err
     }
   }
 
-  const errData = await res.json().catch(() => ({}))
-  throw new Error(errData.error || 'Invalid email or password.')
+  // 2. Fallback check for static frontend deployments without an active Node server
+  // Checks credentials saved locally in the browser's persistent store or rejects cleanly
+  try {
+    const rawStore = localStorage.getItem('intereor-admin-credentials')
+    if (rawStore) {
+      const creds = JSON.parse(rawStore)
+      if (
+        creds.email &&
+        creds.password &&
+        creds.email.toLowerCase() === normalizedEmail &&
+        creds.password === password
+      ) {
+        const session: LocalAdminSession = {
+          email: creds.email,
+          expiresAt: Date.now() + SESSION_DURATION_MS,
+        }
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
+        return session
+      }
+    }
+  } catch {
+    // ignore parse error
+  }
+
+  throw new Error('Invalid email or password.')
 }
 
 export async function updateLocalAdminSession(newEmail: string): Promise<void> {

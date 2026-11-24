@@ -26,7 +26,18 @@ export function AdminLoginPage() {
       await login(email, password)
       navigate(from, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed.')
+      const message = err instanceof Error ? err.message : 'Login failed.'
+      if (
+        message.includes('Failed to fetch') ||
+        message.includes('NetworkError') ||
+        message.includes('fetch failed')
+      ) {
+        setError(
+          'Unable to reach authentication server. Please check your internet connection and verify that your Supabase project URL is active.',
+        )
+      } else {
+        setError(message)
+      }
     } finally {
       setLoading(false)
     }
