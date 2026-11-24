@@ -12,6 +12,8 @@ import {
   HiOutlineFolder,
   HiOutlineClipboardCopy,
   HiOutlineDownload,
+  HiOutlinePrinter,
+  HiOutlineDocumentText,
 } from 'react-icons/hi'
 
 import { useAdminCollection } from '@/admin/hooks/useAdminData'
@@ -36,7 +38,7 @@ export function AdminNotepadPage() {
   const [previewMode, setPreviewMode] = useState<'split' | 'preview-only' | 'edit-only'>('split')
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [copyFeedback, setCopyFeedback] = useState(false)
-  const [downloadingFormat, setDownloadingFormat] = useState<'docx' | 'xlsx' | null>(null)
+  const [downloadingFormat, setDownloadingFormat] = useState<'docx' | 'xlsx' | 'txt' | null>(null)
 
   // Editor form state
   const [formData, setFormData] = useState({
@@ -107,24 +109,14 @@ export function AdminNotepadPage() {
   const handleStartNew = () => {
     setSelectedNoteId(null)
     setFormData({
-      title: 'New Client Consultation',
+      title: 'New Note',
       clientName: '',
       projectName: '',
-      subject: 'Architectural Joinery & Material Specifications',
+      subject: '',
       date: new Date().toISOString().slice(0, 10),
       category: 'work',
       pinned: false,
-      content: `1. Spatial Zoning:
-- Maintain unobstructed sightlines with natural daylight priority.
-- Floor-to-ceiling custom architectural joinery with concealed acoustic detailing.
-
-2. Material Specifications:
-- Natural brushed brass accents & tactile fluted timber.
-- Italian marble / honed quartzite with warm cove illumination (2700K).
-
-3. Immediate Action Items:
-- Finalize preliminary schematic drawings.
-- Sample verification with client on-site.`,
+      content: '',
     })
     setIsEditing(true)
   }
@@ -218,6 +210,47 @@ export function AdminNotepadPage() {
     } finally {
       setDownloadingFormat(null)
     }
+  }
+
+  // Download Plain Text (.txt) directly
+  const handleDownloadTxt = (note: AdminNote) => {
+    try {
+      setDownloadingFormat('txt')
+      const cleanTitle = (note.title || 'NOTEPAD').replace(/[^a-zA-Z0-9_-]/g, '_')
+      const filename = `UNIFIED_VENTURES_INTERIOR_NOTEPAD_${cleanTitle}.txt`
+
+      const lines = [
+        '========================================================================',
+        'UNIFIED VENTURES — INTERIOR ARCHITECTURE & DESIGN ATELIER',
+        '========================================================================',
+        `Title:        ${note.title || 'Untitled Note'}`,
+        `Date:         ${note.date || new Date().toISOString().slice(0, 10)}`,
+        `Category:     ${(note.category || 'work').toUpperCase()}`,
+        `Client:       ${note.clientName || 'N/A'}`,
+        `Project:      ${note.projectName || 'N/A'}`,
+        note.subject ? `Subject:      ${note.subject}` : '',
+        '------------------------------------------------------------------------',
+        'NOTE CONTENT & SPECIFICATIONS:',
+        '------------------------------------------------------------------------',
+        note.content || 'No content recorded.',
+        '',
+        '========================================================================',
+        'Bengaluru, Karnataka, India | support.unifiedventures@gmail.com',
+        '========================================================================',
+      ].filter(Boolean)
+
+      const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' })
+      downloadBlob(blob, filename)
+    } catch (err) {
+      console.error('Failed to download notepad TXT:', err)
+    } finally {
+      setDownloadingFormat(null)
+    }
+  }
+
+  // Print / Save as PDF
+  const handlePrintPdf = () => {
+    window.print()
   }
 
   // Web Share API with Clipboard Fallback
@@ -493,8 +526,29 @@ export function AdminNotepadPage() {
                       >
                         <HiOutlineDownload className="h-4 w-4 text-emerald-600" />
                         <span className="hidden sm:inline">
-                          {downloadingFormat === 'xlsx' ? 'Downloading...' : 'Download Excel (.xlsx)'}
+                          {downloadingFormat === 'xlsx' ? 'Downloading...' : 'Excel (.xlsx)'}
                         </span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDownloadTxt(selectedNote)}
+                        disabled={downloadingFormat !== null}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition cursor-pointer disabled:opacity-60"
+                        title="Download Plain Text (.txt)"
+                      >
+                        <HiOutlineDocumentText className="h-4 w-4 text-amber-600" />
+                        <span className="hidden sm:inline">
+                          {downloadingFormat === 'txt' ? 'Downloading...' : 'Text (.txt)'}
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={handlePrintPdf}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-caption font-medium text-charcoal-700 hover:bg-ivory-100 hover:text-charcoal-900 transition cursor-pointer"
+                        title="Print / Save as PDF"
+                      >
+                        <HiOutlinePrinter className="h-4 w-4 text-charcoal-700" />
+                        <span className="hidden sm:inline">Print / PDF</span>
                       </button>
 
                       <button
