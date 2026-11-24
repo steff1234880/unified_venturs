@@ -353,7 +353,7 @@ export function AdminNotepadPage() {
             </div>
 
             {/* Note List */}
-            <div className="space-y-2.5 max-h-[calc(100vh-22rem)] overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-[70vh] overflow-y-auto overscroll-contain pr-1">
               {loading && (!notes || notes.length === 0) ? (
                 <div className="rounded-xl border border-dashed border-border bg-white/50 p-8 text-center text-charcoal-400 text-body-sm">
                   Loading notes...
@@ -788,7 +788,7 @@ export function AdminNotepadPage() {
 
                     {/* Live Preview Pane */}
                     {previewMode !== 'edit-only' && (
-                      <div className="border border-border/80 rounded-xl bg-ivory-50/40 p-4 overflow-y-auto max-h-[750px]">
+                      <div className="border border-border/80 rounded-xl bg-ivory-50/40 p-4">
                         <LetterheadDocument note={formData as unknown as AdminNote} />
                       </div>
                     )}
@@ -796,7 +796,7 @@ export function AdminNotepadPage() {
                 </div>
               ) : selectedNote ? (
                 /* Read-Only Letterhead View */
-                <div className="p-6 overflow-y-auto max-h-[calc(100vh-18rem)] bg-ivory-50/30">
+                <div className="p-4 sm:p-6 bg-ivory-50/30">
                   <LetterheadDocument note={selectedNote} />
                 </div>
               ) : (

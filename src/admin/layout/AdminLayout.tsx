@@ -149,8 +149,8 @@ export function AdminLayout() {
   useScrollLock(menuOpen)
 
   return (
-    <div className="flex min-h-dvh overflow-x-clip bg-ivory-50">
-      <div className="hidden lg:block">
+    <div className="flex min-h-dvh w-full bg-ivory-50">
+      <div className="hidden lg:block shrink-0">
         <AdminSidebar />
       </div>
 
@@ -173,7 +173,10 @@ export function AdminLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminHeader onMenuClick={() => setMenuOpen(true)} />
-        <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+        <main
+          data-lenis-prevent="true"
+          className="min-w-0 flex-1 p-4 sm:p-6 md:p-8 overscroll-contain"
+        >
           <Outlet />
         </main>
       </div>

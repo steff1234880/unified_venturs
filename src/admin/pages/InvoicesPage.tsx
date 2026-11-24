@@ -447,7 +447,7 @@ export function AdminInvoicesPage() {
   const activeInvoice = isEditing ? (formData as unknown as AdminInvoice) : selectedInvoice
 
   return (
-    <div className="relative min-h-[calc(100vh-6rem)] w-full max-w-full overflow-x-hidden">
+    <div className="relative min-h-full w-full max-w-full">
       {/* Print-Only Document Container */}
       <div className="hidden print:block print:w-full print:bg-white print:text-black print:p-0">
         {activeInvoice && <GstTaxInvoiceDocument invoice={activeInvoice} />}
@@ -569,7 +569,7 @@ export function AdminInvoicesPage() {
             </div>
 
             {/* Invoices List */}
-            <div className="space-y-2.5 max-h-[calc(100vh-23rem)] overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-[70vh] overflow-y-auto overscroll-contain pr-1">
               {loading && (!invoices || invoices.length === 0) ? (
                 <div className="rounded-xl border border-dashed border-border bg-white/50 p-8 text-center text-charcoal-400 text-body-sm">
                   Loading invoices...

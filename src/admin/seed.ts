@@ -6,8 +6,6 @@ import {
   testimonials,
 } from '@/components/sections/data/home.data'
 
-import { UNIFIED_VENTURES_GST } from '@/config/gst'
-import { numberToIndianWords } from './utils/invoice'
 import type { AdminStore } from './types'
 import { createId, nowIso } from './utils'
 
@@ -224,100 +222,7 @@ export function createSeedStore(): AdminStore {
       answer: faq.answer,
     })),
     messages: [],
-    notes: [
-      {
-        id: createId(),
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        title: 'Initial Architectural Brief & Spatial Planning',
-        clientName: 'Siddharth & Priya Rao',
-        projectName: 'Prestige Park Square Residence',
-        subject: 'Living Pavilion & Custom Teak Joinery Specifications',
-        date: new Date().toISOString().slice(0, 10),
-        category: 'work',
-        pinned: true,
-        content: `1. Spatial Zoning:
-- Maintain unobstructed sightlines from main foyer to balcony pavilion.
-- Floor-to-ceiling fluted teak paneling with hidden acoustic dampening.
-
-2. Material Palette:
-- Imported Italian Travertine flooring with brushed brass transition strips.
-- Custom matte charcoal fixtures and warm architectural cove lighting (2700K).
-
-3. Deliverables Timeline:
-- Phase 1: 3D Visualization & Material Swatches approval by end of week.
-- Phase 2: On-site joinery fabrication begins following site clearance.`,
-      },
-    ],
-    invoices: [
-      {
-        id: createId(),
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        invoiceNumber: 'UV/2026-27/001',
-        invoiceDate: new Date().toISOString().slice(0, 10),
-        dueDate: new Date(Date.now() + 15 * 86400000).toISOString().slice(0, 10),
-        status: 'issued',
-        clientName: 'Siddharth & Priya Rao',
-        clientCompany: 'Rao Heritage Living Trust',
-        clientEmail: 'siddharth.rao@example.com',
-        clientPhone: '+91 98450 12345',
-        clientAddress: 'Apartment 1402, Prestige Park Square, Gottigere, Bengaluru, Karnataka 560083',
-        clientGstin: '29ABCDE1234F1Z5',
-        clientState: 'Karnataka',
-        clientStateCode: '29',
-        placeOfSupply: 'Karnataka (29)',
-        placeOfSupplyStateCode: '29',
-        isInterState: false,
-        projectName: 'Prestige Park Square Residence',
-        poNumber: 'PO-PPS-2026-08',
-        items: [
-          {
-            id: createId(),
-            description: 'Comprehensive Interior Architecture, Space Planning & 3D Spatial Visualization',
-            sacHsn: '998391',
-            quantity: 1,
-            unit: 'LS',
-            rate: 250000,
-            taxableAmount: 250000,
-            gstRate: 18,
-            cgstAmount: 22500,
-            sgstAmount: 22500,
-            igstAmount: 0,
-            totalAmount: 295000,
-          },
-          {
-            id: createId(),
-            description: 'Bespoke Architectural Fluted Teak Paneling & Custom Living Room Joinery Fit-out',
-            sacHsn: '995471',
-            quantity: 1,
-            unit: 'LS',
-            rate: 450000,
-            taxableAmount: 450000,
-            gstRate: 18,
-            cgstAmount: 40500,
-            sgstAmount: 40500,
-            igstAmount: 0,
-            totalAmount: 531000,
-          },
-        ],
-        taxableSubtotal: 700000,
-        totalCgst: 63000,
-        totalSgst: 63000,
-        totalIgst: 0,
-        grandTotal: 826000,
-        roundOff: 0,
-        amountInWords: numberToIndianWords(826000),
-        notes: 'Payment terms: 50% advance along with confirmed work order, balance payable upon milestone sign-off. Interest @ 18% p.a. will be charged for delayed payments beyond due date.',
-        bankDetails: {
-          bankName: UNIFIED_VENTURES_GST.bank.bankName,
-          accountName: UNIFIED_VENTURES_GST.bank.accountName,
-          accountNumber: UNIFIED_VENTURES_GST.bank.accountNumber,
-          ifscCode: UNIFIED_VENTURES_GST.bank.ifscCode,
-          branch: UNIFIED_VENTURES_GST.bank.branch,
-          upiId: UNIFIED_VENTURES_GST.bank.upiId,
-        },
-      },
-    ],
+    notes: [],
+    invoices: [],
   }
 }

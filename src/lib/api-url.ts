@@ -10,3 +10,4 @@ export function apiUrl(path: string): string {
   const base = (env.apiUrl || '').trim().replace(/\/+$/, '')
   return base ? `${base}${cleanPath}` : cleanPath
 }
+

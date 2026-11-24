@@ -160,8 +160,6 @@ let hasMigratedLocalMessages = false
 let hasMigratedLocalProjects = false
 let hasMigratedLocalGallery = false
 let hasMigratedLocalCraftsmanship = false
-let hasMigratedLocalNotes = false
-let hasMigratedLocalInvoices = false
 
 async function syncWithBackendNotes(): Promise<AdminNote[] | null> {
   try {
@@ -169,27 +167,7 @@ async function syncWithBackendNotes(): Promise<AdminNote[] | null> {
     if (!res.ok) return null
     const json = await res.json()
     if (!json?.success || !Array.isArray(json?.notes)) return null
-    const backendNotes = json.notes as AdminNote[]
-
-    if (!hasMigratedLocalNotes) {
-      hasMigratedLocalNotes = true
-      const store = readStore()
-      const backendIds = new Set(backendNotes.map((n) => n.id))
-
-      if (Array.isArray(store.notes)) {
-        for (const localNote of store.notes) {
-          if (!backendIds.has(localNote.id)) {
-            void fetch(apiUrl('/api/notes'), {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(localNote),
-            }).catch(() => {})
-          }
-        }
-      }
-    }
-
-    return backendNotes
+    return json.notes as AdminNote[]
   } catch {
     return null
   }
@@ -201,27 +179,7 @@ async function syncWithBackendInvoices(): Promise<AdminInvoice[] | null> {
     if (!res.ok) return null
     const json = await res.json()
     if (!json?.success || !Array.isArray(json?.invoices)) return null
-    const backendInvoices = json.invoices as AdminInvoice[]
-
-    if (!hasMigratedLocalInvoices) {
-      hasMigratedLocalInvoices = true
-      const store = readStore()
-      const backendNumbers = new Set(backendInvoices.map((inv) => inv.invoiceNumber))
-
-      if (Array.isArray(store.invoices)) {
-        for (const localInv of store.invoices) {
-          if (!backendNumbers.has(localInv.invoiceNumber)) {
-            void fetch(apiUrl('/api/invoices'), {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(localInv),
-            }).catch(() => {})
-          }
-        }
-      }
-    }
-
-    return backendInvoices
+    return json.invoices as AdminInvoice[]
   } catch {
     return null
   }
@@ -402,7 +360,7 @@ export async function fetchCollection<K extends CollectionKey>(
 
   if (key === 'notes') {
     const backendNotes = await syncWithBackendNotes()
-    if (backendNotes && backendNotes.length > 0) {
+    if (backendNotes !== null) {
       const store = readStore()
       store.notes = backendNotes
       writeStore(store)
@@ -412,7 +370,7 @@ export async function fetchCollection<K extends CollectionKey>(
 
   if (key === 'invoices') {
     const backendInvoices = await syncWithBackendInvoices()
-    if (backendInvoices && backendInvoices.length > 0) {
+    if (backendInvoices !== null) {
       const store = readStore()
       store.invoices = backendInvoices
       writeStore(store)

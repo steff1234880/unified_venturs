@@ -10,7 +10,7 @@ type AppProvidersProps = {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <MotionConfig reducedMotion="user">
-      <LenisProvider>{children}</LenisProvider>
+      {children}
     </MotionConfig>
   )
 }
