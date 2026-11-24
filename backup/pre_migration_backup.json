@@ -1,0 +1,255 @@
+{
+  "timestamp": "2026-11-24T08:49:25.949Z",
+  "projects": [
+    {
+      "id": "proj_prestige_park_square",
+      "title": "Prestige Park Square",
+      "location": "Bengaluru, Karnataka",
+      "category": "Completed Residence",
+      "year": "2024",
+      "area": "Bengaluru",
+      "image": "/images/after-living-room.jpg",
+      "description": "Completed bespoke residence in Prestige Park Square, Bengaluru. Features custom architectural joinery, organic stone textures, and tailored modern luxury.",
+      "images": [
+        "/images/after-living-room.jpg",
+        "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "published": true,
+      "order": 0,
+      "featured": true,
+      "beforeImage": "/images/before-living-room.jpg",
+      "afterImage": "/images/after-living-room.jpg",
+      "isTransformation": true,
+      "createdAt": "2026-11-20T19:20:10.409Z",
+      "updatedAt": "2026-11-20T19:20:10.409Z"
+    },
+    {
+      "id": "proj_kolte_patil_i_towers",
+      "title": "Kolte Patil i-Towers",
+      "location": "Bengaluru, Karnataka",
+      "category": "Completed Residence",
+      "year": "2024",
+      "area": "Bengaluru",
+      "image": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
+      "description": "Turnkey residence completed in Kolte Patil i-Towers, Bengaluru. Contemporary urban interiors elevated with refined materials and ambient illumination.",
+      "images": [
+        "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "published": true,
+      "order": 1,
+      "featured": false,
+      "beforeImage": "/images/before-living-room.jpg",
+      "afterImage": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
+      "isTransformation": true,
+      "createdAt": "2026-11-20T19:20:10.409Z",
+      "updatedAt": "2026-11-20T19:20:10.409Z"
+    },
+    {
+      "id": "proj_brigade_cornerstone_utopia",
+      "title": "Brigade Cornerstone Utopia",
+      "location": "Bengaluru, Karnataka",
+      "category": "Completed Residence",
+      "year": "2024",
+      "area": "Bengaluru",
+      "image": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
+      "description": "Curated interior transformation in Brigade Cornerstone Utopia, Bengaluru. Tactile artisanal finishes dialogue with contemporary spatial flow.",
+      "images": [
+        "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "published": true,
+      "order": 2,
+      "featured": false,
+      "beforeImage": "/images/before-living-room.jpg",
+      "afterImage": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
+      "isTransformation": true,
+      "createdAt": "2026-11-20T19:20:10.409Z",
+      "updatedAt": "2026-11-20T19:20:10.409Z"
+    },
+    {
+      "id": "proj_bren_zahara",
+      "title": "Bren Zahara",
+      "location": "Bengaluru, Karnataka",
+      "category": "Completed Residence",
+      "year": "2024",
+      "area": "Bengaluru",
+      "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "description": "Bespoke residential interior in Bren Zahara, Bengaluru. Handcrafted wall panelling, bespoke hardware, and quiet understated elegance.",
+      "images": [
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "published": true,
+      "order": 3,
+      "featured": false,
+      "beforeImage": "/images/before-living-room.jpg",
+      "afterImage": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "isTransformation": true,
+      "createdAt": "2026-11-20T19:20:10.409Z",
+      "updatedAt": "2026-11-20T19:20:10.409Z"
+    },
+    {
+      "id": "proj_alpine_viva",
+      "title": "Alpine Viva",
+      "location": "Bengaluru, Karnataka",
+      "category": "Completed Residence",
+      "year": "2024",
+      "area": "Bengaluru",
+      "image": "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80",
+      "description": "Sophisticated interior craftsmanship executed for residence in Alpine Viva, Bengaluru. Warm natural woods, silk-honed stone, and tranquil palette.",
+      "images": [
+        "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+      ],
+      "published": true,
+      "order": 4,
+      "featured": false,
+      "beforeImage": "/images/before-living-room.jpg",
+      "afterImage": "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80",
+      "isTransformation": true,
+      "createdAt": "2026-11-20T19:20:10.409Z",
+      "updatedAt": "2026-11-20T19:20:10.409Z"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "c8a16431-2daf-4c91-9a33-5f16a99a7847",
+      "src": "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=900&q=80",
+      "alt": "Study with heritage bookshelf",
+      "collection": "General",
+      "tall": false,
+      "order": 0,
+      "createdAt": "2026-11-20T19:50:26.341Z",
+      "updatedAt": "2026-11-20T19:50:26.341Z"
+    },
+    {
+      "id": "15db320e-588a-4731-96e7-c73dcee5a8bb",
+      "src": "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=900&q=80",
+      "alt": "Marble bathroom suite",
+      "collection": "General",
+      "tall": false,
+      "order": 0,
+      "createdAt": "2026-11-20T19:50:26.334Z",
+      "updatedAt": "2026-11-20T19:50:26.334Z"
+    },
+    {
+      "id": "63988f06-cbc8-4eb5-a386-425a4ba15481",
+      "src": "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=80",
+      "alt": "Contemporary Indian kitchen",
+      "collection": "General",
+      "tall": true,
+      "order": 0,
+      "createdAt": "2026-11-20T19:50:26.328Z",
+      "updatedAt": "2026-11-20T19:50:26.328Z"
+    },
+    {
+      "id": "60f27342-9f18-4a99-a760-175aeaeadd50",
+      "src": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=80",
+      "alt": "Dining space with brass accents",
+      "collection": "General",
+      "tall": false,
+      "order": 0,
+      "createdAt": "2026-11-20T19:50:26.322Z",
+      "updatedAt": "2026-11-20T19:50:26.322Z"
+    },
+    {
+      "id": "gal_7",
+      "src": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80",
+      "alt": "Carved wood architectural detail",
+      "collection": "Details & Craft",
+      "tall": false,
+      "order": 6,
+      "createdAt": "2026-11-20T19:48:53.529Z",
+      "updatedAt": "2026-11-20T19:48:53.529Z"
+    }
+  ],
+  "craftsmanship": [
+    {
+      "id": "craft_1",
+      "discipline": "Monumental Masonry",
+      "material": "Veined Marble & Laterite",
+      "title": "Honed Stone & Monolithic Veining",
+      "caption": "Hand-selected Statuario and indigenous Makrana marbles, bookmatched with zero-tolerance micro-joints.",
+      "provenance": "Master Stone Guilds",
+      "finish": "Silk-Honed Matte & Fluted Relief",
+      "image": "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=85",
+      "aspectRatio": "aspect-4/5",
+      "published": true,
+      "order": 0,
+      "createdAt": "2026-11-20T20:13:24.204Z",
+      "updatedAt": "2026-11-20T20:13:24.204Z"
+    },
+    {
+      "id": "craft_2",
+      "discipline": "Artisanal Joinery",
+      "material": "Burmese Teak & Dark Walnut",
+      "title": "Warm Grain & Architectural Millwork",
+      "caption": "Seasoned solid hardwoods turned into bespoke fluted wall panels, seamless concealed pivot doors, and heirloom credenzas.",
+      "provenance": "Dedicated Joinery Ateliers",
+      "finish": "Hand-Rubbed Organic Wax & Natural Oil",
+      "image": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=85",
+      "aspectRatio": "aspect-16/10",
+      "published": true,
+      "order": 1,
+      "createdAt": "2026-11-20T20:13:24.204Z",
+      "updatedAt": "2026-11-20T20:13:24.204Z"
+    },
+    {
+      "id": "craft_3",
+      "discipline": "Metalwork & Hardware",
+      "material": "Aged Brass & Bronze Castings",
+      "title": "Antiquated Patinas & Bespoke Accents",
+      "caption": "Custom unlacquered brass hardware, hand-beaten partition screens, and recessed profiles that age gracefully alongside the home.",
+      "provenance": "Artisanal Metal Guilds",
+      "finish": "Brushed Satin & Living Patina",
+      "image": "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=85",
+      "aspectRatio": "aspect-4/3",
+      "published": true,
+      "order": 2,
+      "createdAt": "2026-11-20T20:13:24.204Z",
+      "updatedAt": "2026-11-20T20:13:24.204Z"
+    },
+    {
+      "id": "craft_4",
+      "discipline": "Textile Architecture",
+      "material": "Handloom Linen & Wild Silk",
+      "title": "Tactile Weaves & Acoustic Softness",
+      "caption": "Custom woven silks, bouclé wool drapery, and unbleached Belgian linens layered to soften geometric architecture and filter ambient light.",
+      "provenance": "Master Weaving Looms",
+      "finish": "Raw Organic Weave & Calendered Softness",
+      "image": "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85",
+      "aspectRatio": "aspect-3/4",
+      "published": true,
+      "order": 3,
+      "createdAt": "2026-11-20T20:13:24.204Z",
+      "updatedAt": "2026-11-20T20:13:24.204Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg_mwpcqroy_1lvqw",
+      "firstName": "athul",
+      "lastName": "jr",
+      "email": "mvmcvxhv@gmail.com",
+      "phone": "89656565656",
+      "projectType": "Full Residence",
+      "message": ",cndbm.n,mcnncn,abcj.gulhidhifb,jbjend.kj;f",
+      "read": false,
+      "createdAt": "2026-11-20T19:08:23.602Z",
+      "updatedAt": "2026-11-20T19:08:23.602Z"
+    }
+  ],
+  "admin": {
+    "id": "admin_primary",
+    "email": "ajayunified@gmail.com",
+    "createdAt": "2026-11-21T03:21:20.049Z",
+    "updatedAt": "2026-11-21T03:29:53.728Z"
+  },
+  "stats": {
+    "messages": 1,
+    "unreadMessages": 1,
+    "projects": 5,
+    "gallery": 5
+  }
+}

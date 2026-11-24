@@ -2,6 +2,8 @@ import { createSeedStore } from '@/admin/seed'
 import type {
   AdminCraftsmanshipItem,
   AdminGalleryItem,
+  AdminInvoice,
+  AdminNote,
   AdminProject,
   AdminStore,
   BaseEntity,
@@ -157,6 +159,72 @@ let hasMigratedLocalMessages = false
 let hasMigratedLocalProjects = false
 let hasMigratedLocalGallery = false
 let hasMigratedLocalCraftsmanship = false
+let hasMigratedLocalNotes = false
+let hasMigratedLocalInvoices = false
+
+async function syncWithBackendNotes(): Promise<AdminNote[] | null> {
+  try {
+    const res = await fetch('/api/notes')
+    if (!res.ok) return null
+    const json = await res.json()
+    if (!json?.success || !Array.isArray(json?.notes)) return null
+    const backendNotes = json.notes as AdminNote[]
+
+    if (!hasMigratedLocalNotes) {
+      hasMigratedLocalNotes = true
+      const store = readStore()
+      const backendIds = new Set(backendNotes.map((n) => n.id))
+
+      if (Array.isArray(store.notes)) {
+        for (const localNote of store.notes) {
+          if (!backendIds.has(localNote.id)) {
+            void fetch('/api/notes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(localNote),
+            }).catch(() => {})
+          }
+        }
+      }
+    }
+
+    return backendNotes
+  } catch {
+    return null
+  }
+}
+
+async function syncWithBackendInvoices(): Promise<AdminInvoice[] | null> {
+  try {
+    const res = await fetch('/api/invoices')
+    if (!res.ok) return null
+    const json = await res.json()
+    if (!json?.success || !Array.isArray(json?.invoices)) return null
+    const backendInvoices = json.invoices as AdminInvoice[]
+
+    if (!hasMigratedLocalInvoices) {
+      hasMigratedLocalInvoices = true
+      const store = readStore()
+      const backendNumbers = new Set(backendInvoices.map((inv) => inv.invoiceNumber))
+
+      if (Array.isArray(store.invoices)) {
+        for (const localInv of store.invoices) {
+          if (!backendNumbers.has(localInv.invoiceNumber)) {
+            void fetch('/api/invoices', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(localInv),
+            }).catch(() => {})
+          }
+        }
+      }
+    }
+
+    return backendInvoices
+  } catch {
+    return null
+  }
+}
 
 async function syncWithBackendCraftsmanship(): Promise<AdminCraftsmanshipItem[] | null> {
   try {
@@ -330,6 +398,26 @@ export async function fetchCollection<K extends CollectionKey>(
     }
   }
 
+  if (key === 'notes') {
+    const backendNotes = await syncWithBackendNotes()
+    if (backendNotes && backendNotes.length > 0) {
+      const store = readStore()
+      store.notes = backendNotes
+      writeStore(store)
+      return backendNotes as AdminStore[K]
+    }
+  }
+
+  if (key === 'invoices') {
+    const backendInvoices = await syncWithBackendInvoices()
+    if (backendInvoices && backendInvoices.length > 0) {
+      const store = readStore()
+      store.invoices = backendInvoices
+      writeStore(store)
+      return backendInvoices as AdminStore[K]
+    }
+  }
+
   const store = readStore()
   const collection = Array.isArray(store[key]) ? store[key] : ([] as unknown as AdminStore[K])
   if (key === 'projects' && Array.isArray(collection)) {
@@ -420,6 +508,50 @@ export async function createItem<K extends CollectionKey>(
     }
   }
 
+  if (key === 'notes') {
+    try {
+      const res = await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.note) {
+          const createdNote = json.note as AdminStore[K][number]
+          const store = readStore()
+          store.notes = [...(store.notes || []), createdNote as AdminNote]
+          writeStore(store)
+          return createdNote
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Notes] Backend API save failed, falling back to local store:', apiErr)
+    }
+  }
+
+  if (key === 'invoices') {
+    try {
+      const res = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.invoice) {
+          const createdInvoice = json.invoice as AdminStore[K][number]
+          const store = readStore()
+          store.invoices = [...(store.invoices || []), createdInvoice as AdminInvoice]
+          writeStore(store)
+          return createdInvoice
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Invoices] Backend API save failed, falling back to local store:', apiErr)
+    }
+  }
+
   const store = readStore()
   const timestamp = nowIso()
   const item = {
@@ -494,7 +626,7 @@ export async function updateItem<K extends CollectionKey>(
   if (key === 'craftsmanship') {
     try {
       const res = await fetch(`/api/craftsmanship/${id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
@@ -513,6 +645,56 @@ export async function updateItem<K extends CollectionKey>(
       }
     } catch (apiErr) {
       console.warn('[Craftsmanship] Backend API update failed, updating local store:', apiErr)
+    }
+  }
+
+  if (key === 'notes') {
+    try {
+      const res = await fetch(`/api/notes/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.note) {
+          const updatedNote = json.note as AdminStore[K][number]
+          const store = readStore()
+          const index = (store.notes || []).findIndex((n) => n.id === id)
+          if (index !== -1) {
+            store.notes[index] = updatedNote as AdminNote
+            writeStore(store)
+          }
+          return updatedNote
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Notes] Backend API update failed, updating local store:', apiErr)
+    }
+  }
+
+  if (key === 'invoices') {
+    try {
+      const res = await fetch(`/api/invoices/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const json = await res.json()
+        if (json?.success && json?.invoice) {
+          const updatedInvoice = json.invoice as AdminStore[K][number]
+          const store = readStore()
+          const index = (store.invoices || []).findIndex((inv) => inv.id === id)
+          if (index !== -1) {
+            store.invoices[index] = updatedInvoice as AdminInvoice
+            writeStore(store)
+          }
+          return updatedInvoice
+        }
+      }
+    } catch (apiErr) {
+      console.warn('[Invoices] Backend API update failed, updating local store:', apiErr)
     }
   }
 
@@ -562,6 +744,22 @@ export async function deleteItem<K extends CollectionKey>(
       await fetch(`/api/craftsmanship/${id}`, { method: 'DELETE' })
     } catch (apiErr) {
       console.warn('[Craftsmanship] Backend API delete failed:', apiErr)
+    }
+  }
+
+  if (key === 'notes') {
+    try {
+      await fetch(`/api/notes/${id}`, { method: 'DELETE' })
+    } catch (apiErr) {
+      console.warn('[Notes] Backend API delete failed:', apiErr)
+    }
+  }
+
+  if (key === 'invoices') {
+    try {
+      await fetch(`/api/invoices/${id}`, { method: 'DELETE' })
+    } catch (apiErr) {
+      console.warn('[Invoices] Backend API delete failed:', apiErr)
     }
   }
 
