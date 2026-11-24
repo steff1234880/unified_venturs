@@ -946,13 +946,15 @@ export function authenticateAdmin(email, password) {
   const normalizedEmail = (email || '').trim().toLowerCase()
   getOrCreateDefaultAdmin()
 
-  const user = db.prepare(`SELECT * FROM admin_users WHERE email = ? LIMIT 1`).get(normalizedEmail)
+  const user = db.prepare(`SELECT * FROM admin_users WHERE LOWER(email) = ? LIMIT 1`).get(normalizedEmail)
   if (!user) {
+    console.warn(`[Auth Diagnostic] (SQLite) Login attempt failed: No user found for [${normalizedEmail}]`)
     return null
   }
 
   const isValid = verifyPassword(password, user.password_hash)
   if (!isValid) {
+    console.warn(`[Auth Diagnostic] (SQLite) Login attempt failed: Password mismatch for [${normalizedEmail}]`)
     return null
   }
 

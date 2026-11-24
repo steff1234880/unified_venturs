@@ -228,24 +228,33 @@ export async function migrateFromLocalStore() {
   try {
     // 1. Admin Users
     const adminCheck = await client.query('SELECT COUNT(*) FROM admin_users')
+    const targetEmail = (process.env.ADMIN_EMAIL || 'ajayunified@gmail.com').trim().toLowerCase()
+    const envPassword = process.env.ADMIN_PASSWORD
+    const id = 'admin_primary'
+
     if (parseInt(adminCheck.rows[0].count, 10) === 0) {
-      const defaultEmail = (process.env.ADMIN_EMAIL || 'ajayunified@gmail.com').trim().toLowerCase()
-      const envPassword = process.env.ADMIN_PASSWORD
-      const id = 'admin_primary'
-      
       let passwordHash
       if (envPassword && envPassword.trim()) {
         passwordHash = hashPassword(envPassword.trim())
       } else {
-        // Carry over exact verified existing admin password hash from local SQLite store
+        // Carry over exact verified existing admin password hash from local store
         passwordHash = '6d8c5bd0603386c2f0eff13edd640c90:9b12ca52efb484574e7e98a0159beeb8babcce5ebddba0b3adddedfa04aaae81bfd5b710799e76f982cfc960c81e658dbe95b9082d3888df603a3e153009121d'
       }
 
       await client.query(
         'INSERT INTO admin_users (id, email, password_hash, created_at, updated_at) VALUES ($1, $2, $3, NOW(), NOW()) ON CONFLICT (id) DO NOTHING',
-        [id, defaultEmail, passwordHash]
+        [id, targetEmail, passwordHash]
       )
-      console.log(`[PostgreSQL Migration] Admin user migrated (${defaultEmail}).`)
+      console.log(`[PostgreSQL Migration] Admin user created (${targetEmail}).`)
+    } else if (envPassword && envPassword.trim()) {
+      // If an explicit ADMIN_PASSWORD environment variable was configured in Render Dashboard,
+      // update the admin password hash so the configured credentials immediately work
+      const newHash = hashPassword(envPassword.trim())
+      await client.query(
+        'UPDATE admin_users SET password_hash = $1, email = $2, updated_at = NOW() WHERE id = $3 OR LOWER(email) = $2',
+        [newHash, targetEmail, id]
+      )
+      console.log(`[PostgreSQL Migration] Admin credentials synchronized from environment for (${targetEmail}).`)
     }
 
     // 2. Projects
@@ -570,15 +579,23 @@ export async function getAdminUser() {
 
 export async function authenticateAdmin(email, password) {
   const normalized = email.trim().toLowerCase()
-  const { rows } = await pool.query('SELECT * FROM admin_users WHERE email = $1 LIMIT 1', [normalized])
-  if (!rows[0]) return null
-  const isValid = verifyPassword(password, rows[0].password_hash)
-  if (!isValid) return null
+  const { rows } = await pool.query('SELECT * FROM admin_users WHERE LOWER(email) = $1 LIMIT 1', [normalized])
+  if (!rows[0]) {
+    console.warn(`[Auth Diagnostic] Login attempt failed: No admin user found for email [${normalized}]`)
+    return null
+  }
+  const user = rows[0]
+  const isValid = verifyPassword(password, user.password_hash)
+  if (!isValid) {
+    console.warn(`[Auth Diagnostic] Login attempt failed: Password verification failed for admin [${normalized}]. Hash format valid: ${Boolean(user.password_hash?.includes(':'))}`)
+    return null
+  }
+  console.log(`[Auth Diagnostic] Admin login successful for [${normalized}]`)
   return {
-    id: rows[0].id,
-    email: rows[0].email,
-    createdAt: rows[0].created_at,
-    updatedAt: rows[0].updated_at,
+    id: user.id,
+    email: user.email,
+    createdAt: user.created_at,
+    updatedAt: user.updated_at,
   }
 }
 
