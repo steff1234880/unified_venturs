@@ -13,6 +13,7 @@ import { useAuth } from '@/admin/auth/AuthProvider'
 import { updateLocalAdminSession } from '@/admin/auth/local-auth.service'
 import { Button, FormField, Input } from '@/components/ui'
 import { supabase } from '@/lib/supabase'
+import { apiUrl } from '@/lib/api-url'
 
 export function AdminAccountPage() {
   const { userEmail, isLocalMode, updateUserEmail } = useAuth()
@@ -34,7 +35,7 @@ export function AdminAccountPage() {
     setFetching(true)
 
     if (isLocalMode) {
-      fetch('/api/auth/profile')
+      fetch(apiUrl('/api/auth/profile'))
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (!cancelled && data?.user?.email) {
@@ -103,8 +104,8 @@ export function AdminAccountPage() {
 
     try {
       if (isLocalMode) {
-        // Local mode with SQLite persistence
-        const response = await fetch('/api/admin/account', {
+        // Backend API with PostgreSQL persistence
+        const response = await fetch(apiUrl('/api/admin/account'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

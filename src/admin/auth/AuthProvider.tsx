@@ -10,6 +10,7 @@ import {
 
 import { getLocalSession } from '@/admin/auth/local-auth.service'
 import { login as loginRequest, logout as logoutRequest } from './auth.service'
+import { apiUrl } from '@/lib/api-url'
 
 type AuthContextValue = {
   session: null
@@ -33,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true
     const session = getLocalSession()
     if (session?.email) {
-      fetch('/api/auth/profile')
+      fetch(apiUrl('/api/auth/profile'))
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (mounted && data?.user?.email) {

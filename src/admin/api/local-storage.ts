@@ -11,6 +11,7 @@ import type {
   ContactMessage,
 } from '@/admin/types'
 import { createId, nowIso } from '@/admin/utils'
+import { apiUrl } from '@/lib/api-url'
 
 const STORAGE_KEY = 'intereor-admin-store'
 
@@ -164,7 +165,7 @@ let hasMigratedLocalInvoices = false
 
 async function syncWithBackendNotes(): Promise<AdminNote[] | null> {
   try {
-    const res = await fetch('/api/notes')
+    const res = await fetch(apiUrl('/api/notes'))
     if (!res.ok) return null
     const json = await res.json()
     if (!json?.success || !Array.isArray(json?.notes)) return null
@@ -178,7 +179,7 @@ async function syncWithBackendNotes(): Promise<AdminNote[] | null> {
       if (Array.isArray(store.notes)) {
         for (const localNote of store.notes) {
           if (!backendIds.has(localNote.id)) {
-            void fetch('/api/notes', {
+            void fetch(apiUrl('/api/notes'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(localNote),
@@ -196,7 +197,7 @@ async function syncWithBackendNotes(): Promise<AdminNote[] | null> {
 
 async function syncWithBackendInvoices(): Promise<AdminInvoice[] | null> {
   try {
-    const res = await fetch('/api/invoices')
+    const res = await fetch(apiUrl('/api/invoices'))
     if (!res.ok) return null
     const json = await res.json()
     if (!json?.success || !Array.isArray(json?.invoices)) return null
@@ -210,7 +211,7 @@ async function syncWithBackendInvoices(): Promise<AdminInvoice[] | null> {
       if (Array.isArray(store.invoices)) {
         for (const localInv of store.invoices) {
           if (!backendNumbers.has(localInv.invoiceNumber)) {
-            void fetch('/api/invoices', {
+            void fetch(apiUrl('/api/invoices'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(localInv),
@@ -228,7 +229,7 @@ async function syncWithBackendInvoices(): Promise<AdminInvoice[] | null> {
 
 async function syncWithBackendCraftsmanship(): Promise<AdminCraftsmanshipItem[] | null> {
   try {
-    const res = await fetch('/api/craftsmanship')
+    const res = await fetch(apiUrl('/api/craftsmanship'))
     if (!res.ok) return null
     const json = await res.json()
     if (!json?.success || !Array.isArray(json?.items)) return null
@@ -242,7 +243,7 @@ async function syncWithBackendCraftsmanship(): Promise<AdminCraftsmanshipItem[] 
       if (Array.isArray(store.craftsmanship)) {
         for (const localItem of store.craftsmanship) {
           if (!backendIds.has(localItem.id)) {
-            void fetch('/api/craftsmanship', {
+            void fetch(apiUrl('/api/craftsmanship'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(localItem),
@@ -260,7 +261,7 @@ async function syncWithBackendCraftsmanship(): Promise<AdminCraftsmanshipItem[] 
 
 async function syncWithBackendMessages(): Promise<ContactMessage[] | null> {
   try {
-    const res = await fetch('/api/admin/messages')
+    const res = await fetch(apiUrl('/api/admin/messages'))
     if (!res.ok) return null
     const json = await res.json()
     if (!json?.success || !Array.isArray(json?.messages)) return null
@@ -276,7 +277,7 @@ async function syncWithBackendMessages(): Promise<ContactMessage[] | null> {
       for (const localMsg of store.messages) {
         const key = `${localMsg.email.toLowerCase()}|${localMsg.message.trim()}`
         if (!existingDbEmailsAndMsgs.has(key)) {
-          void fetch('/api/contact', {
+          void fetch(apiUrl('/api/contact'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(localMsg),
@@ -293,7 +294,7 @@ async function syncWithBackendMessages(): Promise<ContactMessage[] | null> {
 
 async function syncWithBackendProjects(): Promise<AdminProject[] | null> {
   try {
-    const res = await fetch('/api/projects')
+    const res = await fetch(apiUrl('/api/projects'))
     if (!res.ok) return null
     const json = await res.json()
     if (!json?.success || !Array.isArray(json?.projects)) return null
@@ -307,7 +308,7 @@ async function syncWithBackendProjects(): Promise<AdminProject[] | null> {
 
       for (const localProj of store.projects) {
         if (!backendIds.has(localProj.id) && !backendTitles.has(localProj.title.toLowerCase().trim())) {
-          void fetch('/api/projects', {
+          void fetch(apiUrl('/api/projects'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(localProj),
@@ -324,7 +325,7 @@ async function syncWithBackendProjects(): Promise<AdminProject[] | null> {
 
 async function syncWithBackendGallery(): Promise<AdminGalleryItem[] | null> {
   try {
-    const res = await fetch('/api/gallery')
+    const res = await fetch(apiUrl('/api/gallery'))
     if (!res.ok) return null
     const json = await res.json()
     if (!json?.success || !Array.isArray(json?.gallery)) return null
@@ -337,7 +338,7 @@ async function syncWithBackendGallery(): Promise<AdminGalleryItem[] | null> {
 
       for (const localGal of store.gallery) {
         if (!backendIds.has(localGal.id)) {
-          void fetch('/api/gallery', {
+          void fetch(apiUrl('/api/gallery'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(localGal),
@@ -444,7 +445,7 @@ export async function createItem<K extends CollectionKey>(
 ): Promise<AdminStore[K][number]> {
   if (key === 'projects') {
     try {
-      const res = await fetch('/api/projects', {
+      const res = await fetch(apiUrl('/api/projects'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -466,7 +467,7 @@ export async function createItem<K extends CollectionKey>(
 
   if (key === 'gallery') {
     try {
-      const res = await fetch('/api/gallery', {
+      const res = await fetch(apiUrl('/api/gallery'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -488,7 +489,7 @@ export async function createItem<K extends CollectionKey>(
 
   if (key === 'craftsmanship') {
     try {
-      const res = await fetch('/api/craftsmanship', {
+      const res = await fetch(apiUrl('/api/craftsmanship'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -510,7 +511,7 @@ export async function createItem<K extends CollectionKey>(
 
   if (key === 'notes') {
     try {
-      const res = await fetch('/api/notes', {
+      const res = await fetch(apiUrl('/api/notes'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -532,7 +533,7 @@ export async function createItem<K extends CollectionKey>(
 
   if (key === 'invoices') {
     try {
-      const res = await fetch('/api/invoices', {
+      const res = await fetch(apiUrl('/api/invoices'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -575,7 +576,7 @@ export async function updateItem<K extends CollectionKey>(
 ): Promise<AdminStore[K][number]> {
   if (key === 'projects') {
     try {
-      const res = await fetch(`/api/projects/${id}`, {
+      const res = await fetch(apiUrl(`/api/projects/${id}`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -600,7 +601,7 @@ export async function updateItem<K extends CollectionKey>(
 
   if (key === 'gallery') {
     try {
-      const res = await fetch(`/api/gallery/${id}`, {
+      const res = await fetch(apiUrl(`/api/gallery/${id}`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -625,7 +626,7 @@ export async function updateItem<K extends CollectionKey>(
 
   if (key === 'craftsmanship') {
     try {
-      const res = await fetch(`/api/craftsmanship/${id}`, {
+      const res = await fetch(apiUrl(`/api/craftsmanship/${id}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -650,7 +651,7 @@ export async function updateItem<K extends CollectionKey>(
 
   if (key === 'notes') {
     try {
-      const res = await fetch(`/api/notes/${id}`, {
+      const res = await fetch(apiUrl(`/api/notes/${id}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -675,7 +676,7 @@ export async function updateItem<K extends CollectionKey>(
 
   if (key === 'invoices') {
     try {
-      const res = await fetch(`/api/invoices/${id}`, {
+      const res = await fetch(apiUrl(`/api/invoices/${id}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -725,7 +726,7 @@ export async function deleteItem<K extends CollectionKey>(
 ): Promise<void> {
   if (key === 'projects') {
     try {
-      await fetch(`/api/projects/${id}`, { method: 'DELETE' })
+      await fetch(apiUrl(`/api/projects/${id}`), { method: 'DELETE' })
     } catch (apiErr) {
       console.warn('[Projects] Backend API delete failed:', apiErr)
     }
@@ -733,7 +734,7 @@ export async function deleteItem<K extends CollectionKey>(
 
   if (key === 'gallery') {
     try {
-      await fetch(`/api/gallery/${id}`, { method: 'DELETE' })
+      await fetch(apiUrl(`/api/gallery/${id}`), { method: 'DELETE' })
     } catch (apiErr) {
       console.warn('[Gallery] Backend API delete failed:', apiErr)
     }
@@ -741,7 +742,7 @@ export async function deleteItem<K extends CollectionKey>(
 
   if (key === 'craftsmanship') {
     try {
-      await fetch(`/api/craftsmanship/${id}`, { method: 'DELETE' })
+      await fetch(apiUrl(`/api/craftsmanship/${id}`), { method: 'DELETE' })
     } catch (apiErr) {
       console.warn('[Craftsmanship] Backend API delete failed:', apiErr)
     }
@@ -749,7 +750,7 @@ export async function deleteItem<K extends CollectionKey>(
 
   if (key === 'notes') {
     try {
-      await fetch(`/api/notes/${id}`, { method: 'DELETE' })
+      await fetch(apiUrl(`/api/notes/${id}`), { method: 'DELETE' })
     } catch (apiErr) {
       console.warn('[Notes] Backend API delete failed:', apiErr)
     }
@@ -757,7 +758,7 @@ export async function deleteItem<K extends CollectionKey>(
 
   if (key === 'invoices') {
     try {
-      await fetch(`/api/invoices/${id}`, { method: 'DELETE' })
+      await fetch(apiUrl(`/api/invoices/${id}`), { method: 'DELETE' })
     } catch (apiErr) {
       console.warn('[Invoices] Backend API delete failed:', apiErr)
     }
@@ -778,7 +779,7 @@ export async function markMessageRead(
   id: string,
   read = true,
 ): Promise<ContactMessage> {
-  void fetch(`/api/admin/messages/${id}`, {
+  void fetch(apiUrl(`/api/admin/messages/${id}`), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ read }),
@@ -788,7 +789,7 @@ export async function markMessageRead(
 }
 
 export async function deleteMessage(id: string): Promise<void> {
-  void fetch(`/api/admin/messages/${id}`, {
+  void fetch(apiUrl(`/api/admin/messages/${id}`), {
     method: 'DELETE',
   }).catch(() => {})
 
@@ -804,7 +805,7 @@ export async function getDashboardStats() {
   let galleryCount = store.gallery.length
 
   try {
-    const res = await fetch('/api/admin/stats')
+    const res = await fetch(apiUrl('/api/admin/stats'))
     if (res.ok) {
       const data = await res.json()
       if (data?.success && data?.stats) {

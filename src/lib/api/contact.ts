@@ -1,6 +1,7 @@
 import { isLocalAdminMode } from '@/admin/auth/mode'
 import { addContactMessage } from '@/admin/storage'
 import { assertSupabaseConfigured, supabase } from '@/lib/supabase'
+import { apiUrl } from '@/lib/api-url'
 
 export type ContactSubmission = {
   firstName: string
@@ -14,7 +15,7 @@ export type ContactSubmission = {
 export async function submitContactMessage(data: ContactSubmission) {
   // Try real database backend API first
   try {
-    const res = await fetch('/api/contact', {
+    const res = await fetch(apiUrl('/api/contact'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

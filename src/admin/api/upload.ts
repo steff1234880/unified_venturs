@@ -1,5 +1,6 @@
 import { isLocalAdminMode } from '@/admin/auth/mode'
 import { assertSupabaseConfigured, supabase } from '@/lib/supabase'
+import { apiUrl } from '@/lib/api-url'
 
 const BUCKET = 'media'
 const MAX_SIZE_BYTES = 20 * 1024 * 1024 // 20 MB limit
@@ -41,7 +42,7 @@ export async function uploadImage(file: File, folder: string): Promise<string> {
   // 1. Try uploading to backend API (/api/upload)
   try {
     const dataUrl = await readFileAsDataUrl(file)
-    const response = await fetch('/api/upload', {
+    const response = await fetch(apiUrl('/api/upload'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

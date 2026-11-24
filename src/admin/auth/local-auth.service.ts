@@ -1,3 +1,5 @@
+import { apiUrl } from '@/lib/api-url'
+
 const SESSION_KEY = 'intereor-admin-session'
 const SESSION_DURATION_MS = 8 * 60 * 60 * 1000
 
@@ -35,9 +37,9 @@ export function getLocalSession(): LocalAdminSession | null {
 export async function localLogin(email: string, password: string): Promise<LocalAdminSession> {
   const normalizedEmail = email.trim().toLowerCase()
 
-  // 1. Try local server backend API authentication backed by SQLite admin_users table
+  // 1. Try server backend API authentication backed by PostgreSQL admin_users table
   try {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch(apiUrl('/api/auth/login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: normalizedEmail, password }),

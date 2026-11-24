@@ -139,7 +139,7 @@ app.post('/api/admin/account', async (req, res) => {
 // ---------------------------------------------------------------------------
 // Dashboard Statistics
 // ---------------------------------------------------------------------------
-app.get('/api/stats', async (req, res) => {
+app.get(['/api/stats', '/api/admin/stats'], async (req, res) => {
   try {
     const stats = await db.getStats()
     res.json({ success: true, stats })
@@ -171,7 +171,7 @@ app.post('/api/contact', async (req, res) => {
   }
 })
 
-app.get('/api/messages', async (req, res) => {
+app.get(['/api/messages', '/api/admin/messages'], async (req, res) => {
   try {
     const messages = await db.getAllMessages()
     res.json({ success: true, messages })
@@ -180,16 +180,7 @@ app.get('/api/messages', async (req, res) => {
   }
 })
 
-app.get('/api/admin/messages', async (req, res) => {
-  try {
-    const messages = await db.getAllMessages()
-    res.json({ success: true, messages })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-})
-
-app.patch('/api/messages/:id/read', async (req, res) => {
+app.patch(['/api/messages/:id/read', '/api/admin/messages/:id'], async (req, res) => {
   try {
     const { id } = req.params
     const { read } = req.body || {}
@@ -201,7 +192,7 @@ app.patch('/api/messages/:id/read', async (req, res) => {
   }
 })
 
-app.delete('/api/messages/:id', async (req, res) => {
+app.delete(['/api/messages/:id', '/api/admin/messages/:id'], async (req, res) => {
   try {
     const { id } = req.params
     const success = await db.deleteMessageById(id)
