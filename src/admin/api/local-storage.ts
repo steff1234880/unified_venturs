@@ -328,8 +328,9 @@ async function syncWithBackendGallery(): Promise<AdminGalleryItem[] | null> {
     const res = await fetch(apiUrl('/api/gallery'))
     if (!res.ok) return null
     const json = await res.json()
-    if (!json?.success || !Array.isArray(json?.gallery)) return null
-    const backendGallery = json.gallery as AdminGalleryItem[]
+    const galleryItems = Array.isArray(json?.items) ? json.items : (Array.isArray(json?.gallery) ? json.gallery : null)
+    if (!json?.success || !galleryItems) return null
+    const backendGallery = galleryItems as AdminGalleryItem[]
 
     if (!hasMigratedLocalGallery) {
       hasMigratedLocalGallery = true
