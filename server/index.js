@@ -20,7 +20,9 @@ const app = express()
 const PORT = process.env.PORT || 5176
 const distDir = path.resolve(process.cwd(), 'dist')
 const publicDir = path.resolve(process.cwd(), 'public')
-const uploadsDir = path.resolve(process.cwd(), 'public', 'uploads')
+const uploadsDir = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.resolve(process.cwd(), 'public', 'uploads')
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true })

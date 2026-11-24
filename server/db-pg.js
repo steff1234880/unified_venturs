@@ -230,14 +230,22 @@ export async function migrateFromLocalStore() {
     const adminCheck = await client.query('SELECT COUNT(*) FROM admin_users')
     if (parseInt(adminCheck.rows[0].count, 10) === 0) {
       const defaultEmail = (process.env.ADMIN_EMAIL || 'ajayunified@gmail.com').trim().toLowerCase()
-      const defaultPassword = process.env.ADMIN_PASSWORD || 'unified@123'
+      const envPassword = process.env.ADMIN_PASSWORD
       const id = 'admin_primary'
-      const hash = hashPassword(defaultPassword)
+      
+      let passwordHash
+      if (envPassword && envPassword.trim()) {
+        passwordHash = hashPassword(envPassword.trim())
+      } else {
+        // Carry over exact verified existing admin password hash from local SQLite store
+        passwordHash = '6d8c5bd0603386c2f0eff13edd640c90:9b12ca52efb484574e7e98a0159beeb8babcce5ebddba0b3adddedfa04aaae81bfd5b710799e76f982cfc960c81e658dbe95b9082d3888df603a3e153009121d'
+      }
+
       await client.query(
         'INSERT INTO admin_users (id, email, password_hash, created_at, updated_at) VALUES ($1, $2, $3, NOW(), NOW()) ON CONFLICT (id) DO NOTHING',
-        [id, defaultEmail, hash]
+        [id, defaultEmail, passwordHash]
       )
-      console.log(`[PostgreSQL Migration] Admin user created (${defaultEmail}).`)
+      console.log(`[PostgreSQL Migration] Admin user migrated (${defaultEmail}).`)
     }
 
     // 2. Projects
@@ -1164,3 +1172,4 @@ export async function getStats() {
     invoices: parseInt(iRes.rows[0].count, 10),
   }
 }
+

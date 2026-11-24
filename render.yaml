@@ -25,8 +25,5 @@ services:
       - key: ADMIN_EMAIL
         value: ajayunified@gmail.com
       - key: ADMIN_PASSWORD
-        value: unified@123
-    disk:
-      name: uploads-data
-      mountPath: /var/data/uploads
-      sizeGB: 1
+        generateValue: true
+
