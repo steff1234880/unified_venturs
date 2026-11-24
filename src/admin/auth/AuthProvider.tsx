@@ -7,16 +7,12 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { Session } from '@supabase/supabase-js'
 
-import { isLocalAdminMode } from '@/admin/auth/mode'
 import { getLocalSession } from '@/admin/auth/local-auth.service'
-import { isSupabaseConfigured, supabase } from '@/lib/supabase'
-
 import { login as loginRequest, logout as logoutRequest } from './auth.service'
 
 type AuthContextValue = {
-  session: Session | null
+  session: null
   userEmail: string | null
   isAuthenticated: boolean
   isLoading: boolean
@@ -29,58 +25,37 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const isLocalMode = isLocalAdminMode()
-  const [session, setSession] = useState<Session | null>(null)
-  const [localEmail, setLocalEmail] = useState<string | null>(() =>
-    isLocalMode ? getLocalSession()?.email ?? null : null,
-  )
-  const [isLoading, setIsLoading] = useState(() =>
-    isLocalAdminMode() ? false : isSupabaseConfigured,
-  )
+  const [localEmail, setLocalEmail] = useState<string | null>(() => getLocalSession()?.email ?? null)
+  const [isLoading] = useState(false)
 
+  // Verify backend session on mount using /api/auth/profile
   useEffect(() => {
-    if (isLocalMode || !isSupabaseConfigured) {
-      return
-    }
-
     let mounted = true
-
-    void supabase.auth.getSession().then(({ data }) => {
-      if (mounted) {
-        setSession(data.session)
-        setIsLoading(false)
-      }
-    })
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession)
-      setIsLoading(false)
-    })
-
+    const session = getLocalSession()
+    if (session?.email) {
+      fetch('/api/auth/profile')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (mounted && data?.user?.email) {
+            setLocalEmail(data.user.email)
+          }
+        })
+        .catch(() => {})
+    }
     return () => {
       mounted = false
-      subscription.unsubscribe()
     }
-  }, [isLocalMode])
+  }, [])
 
   const login = useCallback(async (email: string, password: string) => {
     const result = await loginRequest(email, password)
-
-    if (isLocalAdminMode() && 'email' in result) {
+    if (result && 'email' in result) {
       setLocalEmail(result.email)
-      setSession(null)
-      return
     }
-
-    setSession(result as Session)
-    setLocalEmail(null)
   }, [])
 
   const logout = useCallback(async () => {
     await logoutRequest()
-    setSession(null)
     setLocalEmail(null)
   }, [])
 
@@ -90,16 +65,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      session,
-      userEmail: session?.user.email ?? localEmail,
-      isAuthenticated: session !== null || localEmail !== null,
+      session: null,
+      userEmail: localEmail,
+      isAuthenticated: localEmail !== null,
       isLoading,
-      isLocalMode,
+      isLocalMode: true,
       login,
       logout,
       updateUserEmail,
     }),
-    [session, localEmail, isLoading, isLocalMode, login, logout, updateUserEmail],
+    [localEmail, isLoading, login, logout, updateUserEmail],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

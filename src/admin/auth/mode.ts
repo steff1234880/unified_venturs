@@ -1,6 +1,7 @@
-import { isSupabaseConfigured } from '@/lib/supabase'
-
-/** Use browser localStorage admin when Supabase credentials are missing. */
-export function isLocalAdminMode() {
-  return !isSupabaseConfigured
+/**
+ * The application is powered by the production Node.js + Express backend (backed by PostgreSQL or SQLite).
+ * All admin authentication, API calls, and data operations use the unified Express backend endpoints (/api/...).
+ */
+export function isLocalAdminMode(): boolean {
+  return true
 }
